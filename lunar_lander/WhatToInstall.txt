@@ -1,0 +1,9 @@
+# Install brew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install cmake boost boost-python3 sdl2 swig wget gcc@5
+xcode-select --install
+pip3 install box2d-py gym
+
+# This is needed on ubuntu to record models
+sudo apt-get install ffmpeg
