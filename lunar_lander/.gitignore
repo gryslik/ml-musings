@@ -1,3 +1,2 @@
-*.h5
-models_large_videos/*
+episodes
 __pycache__
