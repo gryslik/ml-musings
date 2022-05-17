@@ -95,7 +95,7 @@ def record_model(file_path):
 
     fly_lander(env, model)
 
-def test_lander(env, model):
+def test_model(env, model):
     step_list = []
     reward_list = []
     for i in range(100):
@@ -113,6 +113,16 @@ def test_lander(env, model):
 
     np.array(reward_list).mean()
 
+def save_model(my_agent, episode, episode_reward):
+    save_model_path = constants.fail_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
+    if episode_reward < 200.0:
+        print("Failed to complete episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
+        if episode % 10 == 0:
+            my_agent.save_model(save_model_path)
+    else:
+        print("Successfully completed in episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
+        my_agent.save_model(save_model_path)
+        record_model(save_model_path)
 
 #Landing pad is always at coordinates (0,0). Coordinates are the first two numbers in state vector.
 # Reward for moving from the top of the screen to landing pad and zero speed is about 100..140 points.
@@ -161,15 +171,7 @@ def train_agent():
         print("--------------------------------------------------------")
         print("Episode: " + str(int(episode)) + " completed in: " + str(step) + " steps.")
         print("--------------------------------------------------------")
-        save_model_path = constants.fail_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
-        if episode_reward < 200.0:
-            print("Failed to complete episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
-            if episode % 10 == 0:
-                my_agent.save_model(save_model_path)
-        else:
-            print("Successfully completed in episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
-            my_agent.save_model(save_model_path)
-            record_model(save_model_path)
+        save_model(my_agent, episode, episode_reward)
         time_end = time.time()
         tf.keras.backend.clear_session()
         print("Processing episode: " + str(episode) + " took: " + str(int(time_end - time_start)) + " seconds. Avg running reward is: " + str(np.array(totalreward)[-100:].mean()))
