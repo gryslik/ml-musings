@@ -56,6 +56,7 @@ class DQN:
         # We want to make the Q value from our network prediction match our target
         self.model.train_on_batch(all_states, all_targets)
 
+    # Take an action given the current state
     def act(self, state):
         self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
@@ -68,6 +69,7 @@ class DQN:
         self.model.save(fn)
 
 
+# Given a model and an environment, fly the lander once using the given model
 def fly_lander(env, model):
     state = env.reset().reshape(1, 8)
     episode_reward = 0
@@ -85,6 +87,7 @@ def fly_lander(env, model):
     print("Episode Reward: " + str(episode_reward))
     return (step, episode_reward)
 
+# Record a given model's flight into a video
 def record_model(file_path):
     model = tf.keras.models.load_model(file_path)
 
@@ -136,11 +139,12 @@ def save_model(my_agent, episode, episode_reward):
 # Y- position
 # X-velocity
 # Y-velocity
-#lander angle
-#angular velocity
-#left leg ground
-#right light ground
+# Lander angle
+# Angular velocity
+# Left leg ground
+# Right light ground
 
+# Train the agent for a given number of episodes and save the resulting models from the episodes
 def train_agent():
     env = gym.make('LunarLander-v2')
     num_episodes = 500
