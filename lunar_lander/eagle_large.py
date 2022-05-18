@@ -68,9 +68,12 @@ class DQN:
     def save_model(self, fn):
         self.model.save(fn)
 
+    def load_model(self, file_path):
+        self.model = tf.keras.models.load_model(file_path)
+
 
 # Given a model and an environment, fly the lander once using the given model
-def fly_lander(env, model):
+def fly_lander(env, model, display):
     state = env.reset().reshape(1, 8)
     episode_reward = 0
     step = 0
@@ -82,21 +85,21 @@ def fly_lander(env, model):
         state = state.reshape(1, 8)
         step += 1
         episode_reward += reward
-        env.render()
+        if display:
+            env.render()
     env.close()
     print("Episode Reward: " + str(episode_reward))
     return (step, episode_reward)
 
 # Record a given model's flight into a video
-def record_model(file_path):
+def record_model(file_path, display):
     model = tf.keras.models.load_model(file_path)
-
     file_name = os.path.basename(file_path)
 
     env = gym.make('LunarLander-v2')
     env = gym.wrappers.RecordVideo(env, constants.video_path + file_name + "/")
 
-    fly_lander(env, model)
+    fly_lander(env, model, display)
 
 def test_model(env, model):
     step_list = []
@@ -117,15 +120,16 @@ def test_model(env, model):
     np.array(reward_list).mean()
 
 def save_model(my_agent, episode, episode_reward):
-    save_model_path = constants.fail_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
     if episode_reward < 200.0:
+        save_model_path = constants.fail_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
         print("Failed to complete episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
         if episode % 10 == 0:
             my_agent.save_model(save_model_path)
     else:
+        save_model_path = constants.success_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
         print("Successfully completed in episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
         my_agent.save_model(save_model_path)
-        record_model(save_model_path)
+        record_model(save_model_path, False)
 
 #Landing pad is always at coordinates (0,0). Coordinates are the first two numbers in state vector.
 # Reward for moving from the top of the screen to landing pad and zero speed is about 100..140 points.
