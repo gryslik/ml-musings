@@ -1,7 +1,0 @@
-# If you are on Linux, do the following prior to installation
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-sudo apt-get install ffmpeg
-
-# Installation
-brew install cmake boost boost-python3 sdl2 swig wget gcc@5
-pip3 install box2d-py gym
