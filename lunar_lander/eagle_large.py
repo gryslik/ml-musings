@@ -25,8 +25,8 @@ class DQN:
         model = tf.keras.Sequential()
         state_shape = self.env.observation_space.shape #this returns (2,) as we observe a vector of 2 numbers (position and velocity)
         model.add(tf.keras.layers.Dense(150, input_dim = state_shape[0], activation = "relu"))
-        model.add(tf.keras.layers.Dense(50, activation="relu"))
-        model.add(tf.keras.layers.Dense(self.env.action_space.n))
+        model.add(tf.keras.layers.Dense(120, activation="relu"))
+        model.add(tf.keras.layers.Dense(self.env.action_space.n, activation="linear"))
         model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate))
         return model
 
@@ -126,7 +126,7 @@ def save_model(my_agent, episode, episode_reward):
         if episode % 10 == 0:
             my_agent.save_model(save_model_path)
     else:
-        save_model_path = constants.success_path + constants.model_name + "-episode-{}_model_failure.h5".format(episode)
+        save_model_path = constants.success_path + constants.model_name + "-episode-{}_model_success.h5".format(episode)
         print("Successfully completed in episode: " + str(episode) + " with a total reward of: " + str(episode_reward))
         my_agent.save_model(save_model_path)
         record_model(save_model_path, False)
