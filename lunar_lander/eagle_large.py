@@ -23,7 +23,7 @@ class DQN:
 
     def create_model(self):
         model = tf.keras.Sequential()
-        state_shape = self.env.observation_space.shape #this returns (2,) as we observe a vector of 2 numbers (position and velocity)
+        state_shape = self.env.observation_space.shape
         model.add(tf.keras.layers.Dense(150, input_dim = state_shape[0], activation = "relu"))
         model.add(tf.keras.layers.Dense(120, activation="relu"))
         model.add(tf.keras.layers.Dense(self.env.action_space.n, activation="linear"))

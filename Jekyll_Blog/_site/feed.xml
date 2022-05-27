@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-05-27T17:57:23-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Training an agent to win at Lunar Lander</title><link href="http://localhost:4000/ml/2022/05/20/lunar-lander.html" rel="alternate" type="text/html" title="Training an agent to win at Lunar Lander" /><published>2022-05-20T14:16:40-04:00</published><updated>2022-05-20T14:16:40-04:00</updated><id>http://localhost:4000/ml/2022/05/20/lunar-lander</id><content type="html" xml:base="http://localhost:4000/ml/2022/05/20/lunar-lander.html"><![CDATA[<h3>Introduction</h3>
+<p>In reinforcement learning, an agent gets rewarded or punished for its actions in a given environment, and over
+time optimizes itself to better perform as it learns what actions to take.</p>
+
+<p>In this blog post, we will demonstrate reinforcement learning by training an AI to win Lunar Lander, a classic
+arcade game from 1979.</p>
+
+<p>The rules of the game are simple. The user controls a lander by firing a combination of three thrusters:
+down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.</p>
+
+<p><img src="/images/lunar_lander.png" alt="Lunar Lander Game Guide" /></p>
+
+<h3>Environment</h3>
+<p>This learning environment specifies the following rewards and punishments:</p>
+
+<p>Rewards:</p>
+<ul>
+  <li>Moving from the top of the screen to the landing pad yields 100-140 points, which are lost if the lander moves away from the landing zone</li>
+  <li>Each leg that contacts the ground yields 10 points</li>
+  <li>If the lander comes to rest, it gets 100 points</li>
+</ul>
+
+<p>Punishments:</p>
+<ul>
+  <li>Firing the down thruster is -0.3 points per frame</li>
+  <li>Firing either of the side thrusters is -0.03 points per frame</li>
+  <li>Crashing the lander is -100 points</li>
+</ul>
+
+<p>The game is “won” if the agent can get 200 points in a game, and a game ends when the lander comes to rest, crashes,
+or leaves the screen</p>
+
+<p>More information on the learning environment can be found <a href="https://www.gymlibrary.ml/environments/box2d/lunar_lander/">here</a></p>
+
+<h3>Creating the learning agent</h3>
+<p>The following parameters must be decided when creating our learning agent:</p>
+<ul>
+  <li>Learning rate (from 0-1): This determines how quickly the agent will pick up new values</li>
+  <li>Discount factor/gamma (0-1): How much weight is given to future rewards in the value function</li>
+  <li>Epsilon decay, initial, and minimum: Epsilon is probability that we chose a random action instead of a greedy action, and thus
+epsilon decay is the value by which epsilon decreases each episode</li>
+  <li>Memory store: How large of a memory store we want to keep</li>
+</ul>
+
+<p>Through research the following hyperparameters were discovered to be optimal:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DQN</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">collections</span><span class="p">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="mi">1000000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.99</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">epsilon_min</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">epsilon_decay</span> <span class="o">=</span> <span class="mf">0.996</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.001</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">create_model</span><span class="p">()</span> <span class="c1"># Will do the actual predictions
+</span></code></pre></div></div>
+
+<p>Next, we create the neural net structure for the agent. Using the Keras sequential model, we have found the following
+structure to work well:</p>
+
+<ul>
+  <li>Input layer with 150 nodes, relu activation function. The input layer is 8 dimensions corresponding to the observation space
+(x and y coordinates of the lander, x and y linear velocities, angle, angular velocity, two booleans representing the legs
+touching the ground)</li>
+  <li>Hidden layer with 120 nodes, relu activation function</li>
+  <li>Output layer with 4 nodes, linear activation function, representing the action space (do nothing, fire left engine, fire main engine, fire right engine)</li>
+</ul>
+
+<p>Below is the code for this initialization</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">Sequential</span><span class="p">()</span>
+        <span class="n">state_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">observation_space</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="n">input_dim</span> <span class="o">=</span> <span class="n">state_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">activation</span> <span class="o">=</span> <span class="s">"relu"</span><span class="p">))</span>
+        <span class="n">model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">"relu"</span><span class="p">))</span>
+        <span class="n">model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">action_space</span><span class="p">.</span><span class="n">n</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">"linear"</span><span class="p">))</span>
+        <span class="n">model</span><span class="p">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">"mean_squared_error"</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">optimizers</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">learning_rate</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">model</span>
+</code></pre></div></div>
+
+<h3>Training the agent</h3>
+
+<p>We are now ready to train our learning agent and create effective AI models for flying the lander.</p>
+
+<p>Let’s start by creating the environment, picking the number of episodes we’ll train the agent for, initializing
+the agent, and creating variables to track total reward and # of steps per episode</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">train_agent</span><span class="p">():</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="p">.</span><span class="n">make</span><span class="p">(</span><span class="s">'LunarLander-v2'</span><span class="p">)</span>
+    <span class="n">num_episodes</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">my_agent</span> <span class="o">=</span> <span class="n">DQN</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">totalreward</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre></div></div>
+
+<p>For each episode, we start at step 0 with a fresh environment and an accumulated reward of 0.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_episodes</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"======================================================"</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"Processing episode: "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">episode</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"======================================================"</span><span class="p">)</span>
+        <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">cur_state</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="n">reset</span><span class="p">().</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">episode_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<p>Until the episode terminates, the following cycle occurs:</p>
+<ol>
+  <li>The agent decides on an action based on the current state.</li>
+  <li>We take the action and get back a new state, the reward for the action, and whether we are done with the episode(as per the episode
+termination conditions mentioned before).</li>
+  <li>We make the agent remember the action it took on the previous state and
+the result of that action</li>
+  <li>The agent replays this event to learn from it.</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span> <span class="c1">#will auto terminate when it reaches 200
+</span>            <span class="n">action</span> <span class="o">=</span> <span class="n">my_agent</span><span class="p">.</span><span class="n">act</span><span class="p">(</span><span class="n">cur_state</span><span class="p">)</span>
+            <span class="n">new_state</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">new_state</span> <span class="o">=</span> <span class="n">new_state</span><span class="p">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">my_agent</span><span class="p">.</span><span class="n">remember</span><span class="p">(</span><span class="n">cur_state</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">new_state</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+            <span class="n">my_agent</span><span class="p">.</span><span class="n">replay</span><span class="p">()</span>
+            <span class="n">cur_state</span> <span class="o">=</span> <span class="n">new_state</span>
+            <span class="n">episode_reward</span> <span class="o">+=</span> <span class="n">reward</span>
+            <span class="n">step</span> <span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">totalreward</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">episode_reward</span><span class="p">)</span>
+        <span class="n">steps</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Here’s how this looks:</p>
+
+<p>First attempt (model 0) goes terribly
+<img src="/videos/lander_crash.gif" alt="crash" /></p>
+
+<p>By model 40, the lander learns how to hover above the goal area without crashing:
+<img src="/videos/lander_hover.gif" alt="hover" /></p>
+
+<p>At model 110, the lander is landing, but not quite in the goal post
+<img src="/videos/almost.gif" alt="almost" /></p>
+
+<p>By model/episode 140, the lander is landing in the goal area perfectly:
+<img src="/videos/perfect.gif" alt="perfect" /></p>]]></content><author><name></name></author><category term="ml" /><summary type="html"><![CDATA[Introduction In reinforcement learning, an agent gets rewarded or punished for its actions in a given environment, and over time optimizes itself to better perform as it learns what actions to take.]]></summary></entry></feed>
