@@ -52,17 +52,17 @@ class DQN:
         all_targets = np.array(self.model.predict_on_batch(all_states))  # get us the predicted rewards
         all_targets[np.arange(len(all_targets)), np.array(all_actions)] = updated_future_discounted_rewards  # updated predicted rewards with future rewards
 
-        # all states will predict the Q-value from our network. All targets is the q_value after taking the actiom
+        # all states will predict the Q-value from our network. All targets is the q_value after taking the action
         # We want to make the Q value from our network prediction match our target
         self.model.train_on_batch(all_states, all_targets)
 
     # Take an action given the current state
     def act(self, state):
-        self.epsilon *= self.epsilon_decay
-        self.epsilon = max(self.epsilon_min, self.epsilon)
-        if np.random.random() < self.epsilon:
+        self.epsilon *= self.epsilon_decay # Multiply our epsilon by the decay
+        self.epsilon = max(self.epsilon_min, self.epsilon) # Never let epsilon go below the minium value
+        if np.random.random() < self.epsilon: # Generate a random number 0-1, if it's less than episolon, do a random action
             return self.env.action_space.sample()
-        else:
+        else: # Otherwise, pick what we believe to be the best action
             return np.argmax(self.model.predict(state)[0])
 
     def save_model(self, fn):
@@ -163,7 +163,7 @@ def train_agent():
         cur_state = env.reset().reshape(1,8)
         episode_reward = 0
         step = 0
-        while True: #will auto terminate when it reaches 200
+        while True: # will auto terminate when it reaches 200
             action = my_agent.act(cur_state)
             new_state, reward, done, info = env.step(action)
             new_state = new_state.reshape(1, 8)
