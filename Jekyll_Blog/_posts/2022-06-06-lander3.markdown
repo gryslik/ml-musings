@@ -133,3 +133,30 @@ EVERY SINGLE FRAME FROM NOW ON"
 
 Bad idea.
 
+<h3>Optimality of neural net design</h3>
+
+With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
+The hidden layers, activation functions, and loss function were things we had to choose.
+
+To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
+the relu activation function. The output layer uses a linear activation function. The loss function we are using is
+means squared error (mse). 
+
+<h4>Node and layer counts</h4>
+Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It's very much
+an experimental process until the best one is discovered. Having too many layers can create a model that's overfitted
+to the training (meaning it won't generalize well to environments different than the ones it trained on),
+and too few causes the model to be too simple and fail to properly train for any environment.
+Two hidden layers worked well, so we stuck with that.
+
+For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
+we went from 150 to 120. Once again, there are no clear "rules" here. It's best to experiment and find what works best
+
+<h4>Activation functions</h4>
+We used relu as the activation function for the hidden layers, and linear for the output. 
+
+_A relu activation function is the same as linear, except that the minimum output of relu is always 0_.
+
+It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.
+
+
