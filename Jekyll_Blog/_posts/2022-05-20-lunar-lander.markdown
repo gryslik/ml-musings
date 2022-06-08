@@ -5,12 +5,12 @@ date:   2022-05-20 14:16:40 -0400
 categories: ml
 ---
 <h3>Introduction</h3>
-In reinforcement learning, an AI agent (an entity that makes decisions) gets rewarded or punished for its actions, and over
-time optimizes itself to better perform as it learns what actions yield the highest reward.
+In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or 
+punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.
 
-This blog post will introduce our problem statement and the setup for our solution.
+In this series, we use reinforcement learning to make an intelligent lunar lander playing AI.
 
-We want to train an agent to play Lunar Lander optimally. The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
+The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
 down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.
 
 ![Lunar Lander Game Guide](/images/lunar_lander.png)
@@ -31,8 +31,13 @@ Punishments:
 * Firing either of the side thrusters is -0.03 points per frame
 * Crashing the lander is -100 points
 
-The episode ends when the lander comes to rest, crashes, leaves the screen, or achieves a certain score (200).
+Each iteration of the game is an "episode", and an episode ends when the lander comes to rest, crashes, leaves the screen, or achieves a certain score (200).
 If the agent ends the episode with a score of 200 or more, the game has been won.
+
+An episode is split into "frames", a frame being the smallest time slice in a game (FPS in a video game). Our agent
+makes calculations every frame. You'll see this referenced often.
+
+For more information, visit the Lunar Lander environment link above.
 
 Now that we understand our constraints, let's get our solution setup and working.
 

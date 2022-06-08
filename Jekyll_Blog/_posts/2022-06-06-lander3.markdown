@@ -11,13 +11,13 @@ third and final post will answer the why behind our hyper parameter and architec
 <h3>Background knowledge</h3>
 <h4>Neural net</h4>
 In post 2, we showcased the neural net structure and left it at that. Now let's dive into how a neural net works.
-The below  image gives a visual representation of what you already know.
+The below image gives a visual representation of what you already know.
 
 ![Neural net Simple](/images/neuralnetsimple.png)
 
 Data that gets passed into an input layer,
 some hidden layers transform the input, and we get an output through the output layer. 
-But how does the data get passed through each node? The diagram illustrates that process for each node.
+But how does the data get passed through each node? The diagram below illustrates that process for each node.
 
 
 ![Neural net detailed](/images/neuralnet1node.png)
@@ -39,15 +39,15 @@ and passing the weighted sum through an activation function
 3. Repeat step 2 until we're out of the neural net
 
 This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
-spits out an action through the above process. But how do we improve the neural net?
+spits out an action through the above process. But how does the agent optimize the neural net?
 
 <h4>Action -> Response -> Reward</h4>
-In reinforcement learning, this is the basic learning cycle. As displayed below, a learning agent takes an action and
+In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
 predicts the reward of this action.
-The action produces a response from the environment, with both a new state and reward. The agent compares its predicted reward 
+The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
 to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
-the weights and biases within its neural net through a process called backpropagation. The structure of the neural net never
-changes, only the weights and biases change. 
+the weights and biases within its neural net through a process called backpropagation. _The structure of the neural net never
+changes, only the weights and biases change._
 This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
 what actions to take.
 

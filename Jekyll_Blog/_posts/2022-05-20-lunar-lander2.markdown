@@ -5,7 +5,7 @@ date:   2022-05-21 14:16:40 -0400
 categories: ml
 ---
 <h3>Introduction</h3>
-In the previous post, we provided an overview of the openai lunar lander environment and got our solution
+In the previous post, we provided an overview of the lunar lander environment and got our solution
 installed and running. In this post, we'll talk about the structure of the solution and what's happening as we train
 our agent.
 
@@ -17,18 +17,22 @@ By now you've probably taken note of the files in the project directory:
 
 Let's dive into how the learning agent was created
 <h3>Creating the learning agent</h3>
+Our agent is responsible for fine tuning the model used to fly the lander, below are the parts of the agent
+we had to define before the training process could start.
 
 <h4>Hyper Parameters</h4>
-Our agent is responsible for learning and creating models that fly the lander. Hyper parameters are parameters that
-control the learning process rather than the performance of the actual models themselves. 
-The following hyperparameters must be decided when creating our learning agent:
-* Learning rate (from 0-1): This determines how quickly the agent will pick up new values
-* Discount factor/gamma (0-1): How much weight is given to future rewards in the value function
-* Epsilon decay, initial, and minimum: Epsilon is the probability that we choose a random action instead of a 
-greedy (what our agent thinks is optimal) action. Epsilon decay is the value by which epsilon decreases each episode.
-* Memory store: How large of a memory store we want to keep
+Hyper parameters are parameters that control the learning process rather than the performance of the model itself. 
+The following hyper parameters must be decided when creating our learning agent:
 
-Through researching how other people have solved this environment the following hyperparameters were discovered to be optimal:
+* Learning rate (from 0-1): This determines how quickly the agent will pick up new values
+* Gamma a.k.a Discount factor (0-1): How much weight is given to the reward of future actions when calculating the value
+of a certain action
+* Epsilon decay, initial, and minimum: Epsilon is the probability that we choose a random action for the current frame instead of a 
+optimal action. Epsilon decay is the value by which epsilon decreases each frame.
+* Memory store: How large of a memory store we want to keep. In our agents memory, we store a state, action, reward for the
+state+action, the resulting state, and whether this action ended the episode.
+
+Through researching how other people have solved this environment the following hyper parameters were discovered to be optimal:
 ```python
 class DQN:
     def __init__(self, env):
@@ -44,19 +48,20 @@ class DQN:
 In a later blog post, we'll discuss why these particular parameters are optimal. For now, it's sufficient to understand
 what they are and how they impact our agent.
 
-<h4>Neural net structure</h4>
-Next, we create the neural net structure for the agent. A neural net consists of an input, hidden, and output layer
-and is what informs the agents thinking. We'll discuss how exactly a neural net works later on, for now, just understand
-that the neural net is what turns the input (our observations about the environment) into outputs (the actions we take).
-The input layer takes in the data, the hidden layer(s) transform the inputs, and the output layer represents
-the action. Each layer has a node count and an activation function. For our neural net, we are using a [Keras Sequential Model](https://keras.io/guides/sequential_model/)
+<h4>Model Structure - Neural Net</h4>
+The agent itself doesn't fly the lander, and the hyper parameters just inform how the agent trains itself, the _model_
+is what actually flies the lander. The model is a part of the agent and something the agent fine-tunes over time. 
+We are using a neural net for our model. A neural net consists of an input, hidden, and output layer
+and takes input (the agent's observations about the environment) and turns them into outputs (actions).
+We'll discuss how exactly a neural net works later on, for now it is sufficient to understand the above. 
+For our neural net, we are using a [Keras Sequential Model](https://keras.io/guides/sequential_model/)
 
 We have found the following structure to work well:
 * Input layer with 8 nodes representing the observation space ((x and y coordinates of the lander, x and y linear velocities, angle, angular velocity, two booleans representing the legs
   touching the ground))
-* Hidden layer with 150 nodes, relu activation function.
-* Hidden layer with 120 nodes, relu activation function
-* Output layer with 4 nodes, linear activation function, representing the action space (do nothing, fire left engine, fire main engine, fire right engine)
+* Hidden layer with 150 nodes
+* Hidden layer with 120 nodes
+* Output layer with 4 nodes representing the action space (do nothing, fire left engine, fire main engine, fire right engine)
 
 Below is the code for this initialization
 ```python
@@ -70,7 +75,8 @@ create_model(self):
         return model
 ```
 
-Once again, don't sweat the details too much right now. 
+Once again, don't sweat the details right now, in our next post, we'll go into detail about what happens
+inside a neural net.
 <h3>Training the agent</h3>
 
 If you followed the instructions on the previous blog post and have the training running in the background,
@@ -97,7 +103,7 @@ For each episode, we start at step 0 with a fresh environment and an accumulated
         print("Processing episode: " + str(episode))
         print("======================================================")
         time_start = time.time()
-        cur_state = env.reset().reshape(1,8)
+        cur_state = env.reset().reshape(1,8) # Reset the environment
         episode_reward = 0
         step = 0
 ```
