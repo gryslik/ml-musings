@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  "Beating Lunar Lander with AI - Part 2"
+title:  "Part 2"
 date:   2022-05-21 14:16:40 -0400
-categories: ml
+author: "Daniel Mogilevsky, Gregory Ryslik"
+categories: Lander
 ---
 <h3>Introduction</h3>
 In the previous post, we provided an overview of the lunar lander environment and got our solution
