@@ -2,12 +2,15 @@ import random
 import numpy as np
 import tensorflow as tf
 import collections
+import warnings
 import numpy as np
 import gym
 import time
 import pandas as pd
 import constants
 import os
+
+warnings.simplefilter("ignore", lineno=148)
 
 # The agent we will be training
 class DQN:
@@ -27,7 +30,7 @@ class DQN:
         model.add(tf.keras.layers.Dense(150, input_dim = state_shape[0], activation = "relu"))
         model.add(tf.keras.layers.Dense(120, activation="relu"))
         model.add(tf.keras.layers.Dense(self.env.action_space.n, activation="linear"))
-        model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate))
+        model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(learning_rate=self.learning_rate))
         return model
 
     def remember(self, state, action, reward, new_state, done):

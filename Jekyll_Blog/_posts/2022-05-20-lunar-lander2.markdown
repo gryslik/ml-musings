@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  "Beating Lunar Lander with AI - Part 2"
+title:  "Part 2"
 date:   2022-05-21 14:16:40 -0400
-categories: ml
+author: "Daniel Mogilevsky, Gregory Ryslik"
+categories: Lander
 ---
 <h3>Introduction</h3>
 In the previous post, we provided an overview of the lunar lander environment and got our solution
@@ -33,6 +34,7 @@ optimal action. Epsilon decay is the value by which epsilon decreases each frame
 state+action, the resulting state, and whether this action ended the episode.
 
 Through researching how other people have solved this environment the following hyper parameters were discovered to be optimal:
+[Code Link](https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L16-L25)
 ```python
 class DQN:
     def __init__(self, env):
@@ -64,6 +66,7 @@ We have found the following structure to work well:
 * Output layer with 4 nodes representing the action space (do nothing, fire left engine, fire main engine, fire right engine)
 
 Below is the code for this initialization
+[Code Link](https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L27-L34)
 ```python
 create_model(self):
         model = tf.keras.Sequential()
@@ -75,8 +78,33 @@ create_model(self):
         return model
 ```
 
-Once again, don't sweat the details right now, in our next post, we'll go into detail about what happens
-inside a neural net.
+Once again, don't sweat the details right now, in our next post, we'll do that in the final post.
+
+Lastly, our class has two helper functions, _act_ and _remember_
+
+_Act_, shown below, is causes the agent to take an action given a game/environment state. The details of how epsilon
+is used will be made clear in the last post, but astute readers will see that epsilon determines whether the
+agent picks a random action or what it believes to be the ideal action.
+[Code Link](https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L63-L69)
+```python
+    def act(self, state):
+        self.epsilon *= self.epsilon_decay # Multiply our epsilon by the decay
+        self.epsilon = max(self.epsilon_min, self.epsilon) # Never let epsilon go below the minium value
+        if np.random.random() < self.epsilon: # Generate a random number 0-1, if it's less than episolon, do a random action
+            return self.env.action_space.sample()
+        else: # Otherwise, pick what we believe to be the best action
+            return np.argmax(self.model.predict(state)[0])
+```
+
+_Remember_ causes the agent to remember the previous state, the action it took in that state, the reward of the action,
+the resulting/new state from that action, and whether the game reached completion from the action. It remembers this
+by appending all of these details into the memory buffer
+[Code Link](https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L37)
+```python
+    def remember(self, state, action, reward, new_state, done):
+        self.memory.append([state, action, reward, new_state, done])
+```
+
 <h3>Training the agent</h3>
 
 If you followed the instructions on the previous blog post and have the training running in the background,
@@ -87,6 +115,7 @@ Let's dive into what's happening in the training cycle.
 We started by creating the environment, picking the number of episodes we'll train the agent for, initializing
 the agent, and creating variables to track total reward and # of steps per episode
 
+[Link to Code](https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L155-L196)
 ```python
 def train_agent():
     env = gym.make('LunarLander-v2')

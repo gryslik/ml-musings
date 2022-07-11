@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-06-06T18:42:49-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Beating Lunar Lander with AI - Part 3</title><link href="http://localhost:4000/ml/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Beating Lunar Lander with AI - Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/ml/2022/06/05/lander3.html"><![CDATA[<p>In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-06-29T19:03:59-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Part 3</title><link href="http://localhost:4000/lander/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/lander/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/lander/2022/06/05/lander3.html"><![CDATA[<p>In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
 for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
 third and final post will answer the why behind our hyper parameter and architecture choices.</p>
 
 <h3>Background knowledge</h3>
 <h4>Neural net</h4>
 <p>In post 2, we showcased the neural net structure and left it at that. Now let’s dive into how a neural net works.
-The below  image gives a visual representation of what you already know.</p>
+The below image gives a visual representation of what you already know.</p>
 
 <p><img src="/images/neuralnetsimple.png" alt="Neural net Simple" /></p>
 
 <p>Data that gets passed into an input layer,
 some hidden layers transform the input, and we get an output through the output layer. 
-But how does the data get passed through each node? The diagram illustrates that process for each node.</p>
+But how does the data get passed through each node? The diagram below illustrates that process for each node.</p>
 
 <p><img src="/images/neuralnet1node.png" alt="Neural net detailed" /></p>
 
@@ -34,15 +34,15 @@ and passing the weighted sum through an activation function</li>
 </ol>
 
 <p>This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
-spits out an action through the above process. But how do we improve the neural net?</p>
+spits out an action through the above process. But how does the agent optimize the neural net?</p>
 
 <h4>Action -&gt; Response -&gt; Reward</h4>
-<p>In reinforcement learning, this is the basic learning cycle. As displayed below, a learning agent takes an action and
+<p>In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
 predicts the reward of this action.
-The action produces a response from the environment, with both a new state and reward. The agent compares its predicted reward 
+The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
 to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
-the weights and biases within its neural net through a process called backpropagation. The structure of the neural net never
-changes, only the weights and biases change. 
+the weights and biases within its neural net through a process called backpropagation. <em>The structure of the neural net never
+changes, only the weights and biases change.</em>
 This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
 what actions to take.</p>
 
@@ -127,8 +127,34 @@ a slow learning rate, we prevent the agent from over-adjusting from each action.
 <p>“Oh, firing the engine in this frame was better than not firing the engine? Okay, let me fire the main engine for 
 EVERY SINGLE FRAME FROM NOW ON”</p>
 
-<p>Bad idea.</p>]]></content><author><name></name></author><category term="ml" /><summary type="html"><![CDATA[In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.]]></summary></entry><entry><title type="html">Beating Lunar Lander with AI - Part 2</title><link href="http://localhost:4000/ml/2022/05/21/lunar-lander2.html" rel="alternate" type="text/html" title="Beating Lunar Lander with AI - Part 2" /><published>2022-05-21T14:16:40-04:00</published><updated>2022-05-21T14:16:40-04:00</updated><id>http://localhost:4000/ml/2022/05/21/lunar-lander2</id><content type="html" xml:base="http://localhost:4000/ml/2022/05/21/lunar-lander2.html"><![CDATA[<h3>Introduction</h3>
-<p>In the previous post, we provided an overview of the openai lunar lander environment and got our solution
+<p>Bad idea.</p>
+
+<h3>Optimality of neural net design</h3>
+
+<p>With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
+The hidden layers, activation functions, and loss function were things we had to choose.</p>
+
+<p>To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
+the relu activation function. The output layer uses a linear activation function. The loss function we are using is
+means squared error (mse).</p>
+
+<h4>Node and layer counts</h4>
+<p>Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It’s very much
+an experimental process until the best one is discovered. Having too many layers can create a model that’s overfitted
+to the training (meaning it won’t generalize well to environments different than the ones it trained on),
+and too few causes the model to be too simple and fail to properly train for any environment.
+Two hidden layers worked well, so we stuck with that.</p>
+
+<p>For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
+we went from 150 to 120. Once again, there are no clear “rules” here. It’s best to experiment and find what works best</p>
+
+<h4>Activation functions</h4>
+<p>We used relu as the activation function for the hidden layers, and linear for the output.</p>
+
+<p><em>A relu activation function is the same as linear, except that the minimum output of relu is always 0</em>.</p>
+
+<p>It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.</p>]]></content><author><name>Daniel Mogilevsky, Gregory Ryslik</name></author><category term="Lander" /><summary type="html"><![CDATA[In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.]]></summary></entry><entry><title type="html">Part 2</title><link href="http://localhost:4000/lander/2022/05/21/lunar-lander2.html" rel="alternate" type="text/html" title="Part 2" /><published>2022-05-21T14:16:40-04:00</published><updated>2022-05-21T14:16:40-04:00</updated><id>http://localhost:4000/lander/2022/05/21/lunar-lander2</id><content type="html" xml:base="http://localhost:4000/lander/2022/05/21/lunar-lander2.html"><![CDATA[<h3>Introduction</h3>
+<p>In the previous post, we provided an overview of the lunar lander environment and got our solution
 installed and running. In this post, we’ll talk about the structure of the solution and what’s happening as we train
 our agent.</p>
 
@@ -142,20 +168,24 @@ our agent.</p>
 
 <p>Let’s dive into how the learning agent was created</p>
 <h3>Creating the learning agent</h3>
+<p>Our agent is responsible for fine tuning the model used to fly the lander, below are the parts of the agent
+we had to define before the training process could start.</p>
 
 <h4>Hyper Parameters</h4>
-<p>Our agent is responsible for learning and creating models that fly the lander. Hyper parameters are parameters that
-control the learning process rather than the performance of the actual models themselves. 
-The following hyperparameters must be decided when creating our learning agent:</p>
+<p>Hyper parameters are parameters that control the learning process rather than the performance of the model itself. 
+The following hyper parameters must be decided when creating our learning agent:</p>
+
 <ul>
   <li>Learning rate (from 0-1): This determines how quickly the agent will pick up new values</li>
-  <li>Discount factor/gamma (0-1): How much weight is given to future rewards in the value function</li>
-  <li>Epsilon decay, initial, and minimum: Epsilon is the probability that we choose a random action instead of a 
-greedy (what our agent thinks is optimal) action. Epsilon decay is the value by which epsilon decreases each episode.</li>
-  <li>Memory store: How large of a memory store we want to keep</li>
+  <li>Gamma a.k.a Discount factor (0-1): How much weight is given to the reward of future actions when calculating the value
+of a certain action</li>
+  <li>Epsilon decay, initial, and minimum: Epsilon is the probability that we choose a random action for the current frame instead of a 
+optimal action. Epsilon decay is the value by which epsilon decreases each frame.</li>
+  <li>Memory store: How large of a memory store we want to keep. In our agents memory, we store a state, action, reward for the
+state+action, the resulting state, and whether this action ended the episode.</li>
 </ul>
 
-<p>Through researching how other people have solved this environment the following hyperparameters were discovered to be optimal:</p>
+<p>Through researching how other people have solved this environment the following hyper parameters were discovered to be optimal:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DQN</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
         <span class="bp">self</span><span class="p">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
@@ -170,20 +200,21 @@ greedy (what our agent thinks is optimal) action. Epsilon decay is the value by 
 <p>In a later blog post, we’ll discuss why these particular parameters are optimal. For now, it’s sufficient to understand
 what they are and how they impact our agent.</p>
 
-<h4>Neural net structure</h4>
-<p>Next, we create the neural net structure for the agent. A neural net consists of an input, hidden, and output layer
-and is what informs the agents thinking. We’ll discuss how exactly a neural net works later on, for now, just understand
-that the neural net is what turns the input (our observations about the environment) into outputs (the actions we take).
-The input layer takes in the data, the hidden layer(s) transform the inputs, and the output layer represents
-the action. Each layer has a node count and an activation function. For our neural net, we are using a <a href="https://keras.io/guides/sequential_model/">Keras Sequential Model</a></p>
+<h4>Model Structure - Neural Net</h4>
+<p>The agent itself doesn’t fly the lander, and the hyper parameters just inform how the agent trains itself, the <em>model</em>
+is what actually flies the lander. The model is a part of the agent and something the agent fine-tunes over time. 
+We are using a neural net for our model. A neural net consists of an input, hidden, and output layer
+and takes input (the agent’s observations about the environment) and turns them into outputs (actions).
+We’ll discuss how exactly a neural net works later on, for now it is sufficient to understand the above. 
+For our neural net, we are using a <a href="https://keras.io/guides/sequential_model/">Keras Sequential Model</a></p>
 
 <p>We have found the following structure to work well:</p>
 <ul>
   <li>Input layer with 8 nodes representing the observation space ((x and y coordinates of the lander, x and y linear velocities, angle, angular velocity, two booleans representing the legs
 touching the ground))</li>
-  <li>Hidden layer with 150 nodes, relu activation function.</li>
-  <li>Hidden layer with 120 nodes, relu activation function</li>
-  <li>Output layer with 4 nodes, linear activation function, representing the action space (do nothing, fire left engine, fire main engine, fire right engine)</li>
+  <li>Hidden layer with 150 nodes</li>
+  <li>Hidden layer with 120 nodes</li>
+  <li>Output layer with 4 nodes representing the action space (do nothing, fire left engine, fire main engine, fire right engine)</li>
 </ul>
 
 <p>Below is the code for this initialization</p>
@@ -197,7 +228,8 @@ touching the ground))</li>
         <span class="k">return</span> <span class="n">model</span>
 </code></pre></div></div>
 
-<p>Once again, don’t sweat the details too much right now.</p>
+<p>Once again, don’t sweat the details right now, in our next post, we’ll go into detail about what happens
+inside a neural net.</p>
 <h3>Training the agent</h3>
 
 <p>If you followed the instructions on the previous blog post and have the training running in the background,
@@ -222,8 +254,8 @@ the agent, and creating variables to track total reward and # of steps per episo
         <span class="k">print</span><span class="p">(</span><span class="s">"Processing episode: "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">episode</span><span class="p">))</span>
         <span class="k">print</span><span class="p">(</span><span class="s">"======================================================"</span><span class="p">)</span>
         <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">cur_state</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="n">reset</span><span class="p">().</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
-        <span class="n">episode_reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cur_state</span> <span class="o">=</span> <span class="n">env</span><span class="p">.</span><span class="n">reset</span><span class="p">().</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span> <span class="c1"># Reset the environment
+</span>        <span class="n">episode_reward</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></div>
 
@@ -281,13 +313,13 @@ We also check if we are done with this episode.
 
 <p>After only 140 episodes of training, our AI can play lunar lander better than
 most human players. In our final blog post, we’ll analyze why our hyper parameters and neural net structure work
-and the math behind them.</p>]]></content><author><name></name></author><category term="ml" /><summary type="html"><![CDATA[Introduction In the previous post, we provided an overview of the openai lunar lander environment and got our solution installed and running. In this post, we’ll talk about the structure of the solution and what’s happening as we train our agent.]]></summary></entry><entry><title type="html">Beating Lunar Lander with AI - Introduction</title><link href="http://localhost:4000/ml/2022/05/20/lunar-lander.html" rel="alternate" type="text/html" title="Beating Lunar Lander with AI - Introduction" /><published>2022-05-20T14:16:40-04:00</published><updated>2022-05-20T14:16:40-04:00</updated><id>http://localhost:4000/ml/2022/05/20/lunar-lander</id><content type="html" xml:base="http://localhost:4000/ml/2022/05/20/lunar-lander.html"><![CDATA[<h3>Introduction</h3>
-<p>In reinforcement learning, an AI agent (an entity that makes decisions) gets rewarded or punished for its actions, and over
-time optimizes itself to better perform as it learns what actions yield the highest reward.</p>
+and the math behind them.</p>]]></content><author><name>Daniel Mogilevsky, Gregory Ryslik</name></author><category term="Lander" /><summary type="html"><![CDATA[Introduction In the previous post, we provided an overview of the lunar lander environment and got our solution installed and running. In this post, we’ll talk about the structure of the solution and what’s happening as we train our agent.]]></summary></entry><entry><title type="html">Introduction</title><link href="http://localhost:4000/lander/2022/05/20/lunar-lander.html" rel="alternate" type="text/html" title="Introduction" /><published>2022-05-20T14:16:40-04:00</published><updated>2022-05-20T14:16:40-04:00</updated><id>http://localhost:4000/lander/2022/05/20/lunar-lander</id><content type="html" xml:base="http://localhost:4000/lander/2022/05/20/lunar-lander.html"><![CDATA[<h3>Introduction</h3>
+<p>In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or 
+punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.</p>
 
-<p>This blog post will introduce our problem statement and the setup for our solution.</p>
+<p>In this series, we use reinforcement learning to make an intelligent lunar lander playing AI.</p>
 
-<p>We want to train an agent to play Lunar Lander optimally. The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
+<p>The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
 down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.</p>
 
 <p><img src="/images/lunar_lander.png" alt="Lunar Lander Game Guide" /></p>
@@ -311,28 +343,72 @@ for our AI to play the game. The environment specifies the following rewards and
   <li>Crashing the lander is -100 points</li>
 </ul>
 
-<p>The episode ends when the lander comes to rest, crashes, leaves the screen, or achieves a certain score (200).
+<p>Each iteration of the game is an “episode”, and an episode ends when the lander comes to rest, crashes, leaves the screen, or achieves a certain score (200).
 If the agent ends the episode with a score of 200 or more, the game has been won.</p>
+
+<p>An episode is split into “frames”, a frame being the smallest time slice in a game (FPS in a video game). Our agent
+makes calculations every frame. You’ll see this referenced often.</p>
+
+<p>For more information, visit the Lunar Lander environment link above.</p>
 
 <p>Now that we understand our constraints, let’s get our solution setup and working.</p>
 
 <h3>Setting up the project</h3>
-<p>First, the following must be installed for our project to run:</p>
+
+<p>Before installing everything we need, you can do the optional step of installing <a href="https://www.anaconda.com/">Anaconda</a>
+and <a href="https://www.machinelearningplus.com/deployment/conda-create-environment-and-everything-you-need-to-know-to-manage-conda-virtual-environment/">creating a conda environment</a>. 
+This is recommended, but completely unnecessary, so feel free to skip this step if you are fine with installing python
+packages outside of a virtual environment.</p>
+
+<p>Now, the following must be installed for our project to run:</p>
 <ul>
   <li><a href="https://www.python.org/downloads/">Python 3</a></li>
   <li><a href="https://numpy.org/install/">Numpy</a></li>
   <li><a href="https://www.tensorflow.org/install/">Tensorflow</a></li>
   <li><a href="https://pypi.org/project/gym/">Gym</a></li>
   <li><a href="https://pypi.org/project/pandas/">Pandas</a></li>
+  <li><a href="https://git-scm.com/downloads">Git</a> (Optional, makes it easy to clone the Git repository with all our code)</li>
 </ul>
 
-<p>Once you have the above, clone the Lunar Lander Git repo.</p>
+<p>Once you have the above, clone the <a href="https://github.com/gryslik/ml-musings/tree/lunar_lander">Lunar Lander Git repo</a> by
+running the following in a terminal</p>
+
+<p><code>git clone git@github.com:gryslik/ml-musings.git</code></p>
 
 <h3>Running the trainer</h3>
 <p>To run the project, go into the project directory and from the terminal run:</p>
 <p><code>python3 main.py</code></p>
 
-<p>When prompted, enter “1” to start training the agent. This will take a while.</p>
+<p>When prompted, enter “1” to start training the agent. This will take a while. Your output should
+look like the below and continue for a while</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>======================================================
+Processing episode: 0
+======================================================
+1/1 [==============================] - 1s 857ms/step
+1/1 [==============================] - 0s 60ms/step
+1/1 [==============================] - 0s 40ms/step
+1/1 [==============================] - 0s 52ms/step
+1/1 [==============================] - 0s 23ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:58.907627: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+2022-06-29 18:58:58.950908: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 17ms/step
+1/1 [==============================] - 0s 11ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:59.378810: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 14ms/step
+1/1 [==============================] - 0s 12ms/step
+1/1 [==============================] - 0s 16ms/step
+--------------------------------------------------------
+Episode: 0 completed in: 78 steps.
+--------------------------------------------------------
+Failed to complete episode: 0 with a total reward of: -137.2459988101599
+Processing episode: 0 took: 3 seconds. Avg running reward is: -137.2459988101599
+======================================================
+Processing episode: 1
+======================================================
+</code></pre></div></div>
 
 <h3>While the agent is training, check
-out the next blog post which talks about the project structure and what's happening as you're waiting.</h3>]]></content><author><name></name></author><category term="ml" /><summary type="html"><![CDATA[Introduction In reinforcement learning, an AI agent (an entity that makes decisions) gets rewarded or punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.]]></summary></entry></feed>
+out the next blog post which talks about the project structure and what's happening as you're waiting.</h3>]]></content><author><name>Daniel Mogilevsky, Gregory Ryslik</name></author><category term="Lander" /><summary type="html"><![CDATA[Introduction In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.]]></summary></entry></feed>

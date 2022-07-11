@@ -2,6 +2,8 @@ import eagle_large
 import os
 import pathlib
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
+
 valid_options = {"1", "2"}
 response = ""
 while response not in valid_options:

@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  "Beating Lunar Lander with AI - Part 3"
+title:  "Part 3"
 date:   2022-06-05 14:16:40 -0400
-categories: ml
+author: "Daniel Mogilevsky, Gregory Ryslik"
+categories: Lander
 ---
 In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
 for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
@@ -112,6 +113,8 @@ If we only take a couple frames into account when making predictions, there's no
 lot changes in between frames, so maximizing the discount factor ensures we look far enough into the future to make accurate
 predictions.
 
+Gamma was initially guessed at 0.9, which produced bad results, however 0.99 worked just fine
+
 <h4>Epsilon</h4>
 Just like gamma needed to be set very high because of the number of frames per game, so does epsilon need to be set high
 and epsilon decay needs to be slow. Each individual frame has little impact on the outcome. If epsilon
@@ -123,6 +126,10 @@ would be cutting the engine completely and letting the lander crash because of t
 We prevent this with a high epsilon and slow decay, causing the model to train on lots of random actions before picking
 optimal actions.
 
+Epsilon decay was guessed at around 0.9, but this wasn't high enough initially and produced very bad results.
+Then 0.99 was attempted, followed by 0.999. This was then decremented to 0.998, 0.997, etc and 0.996 was found to be
+the optimal value
+
 <h4>Learning rate</h4>
 Learning rate needs to be _sloooooow_, also because of the minimum impact of each frame. We want our agent to slowly adjust
 it's behavior from each frame for this reason. We have many, many frames, each very similar to the last. By setting
@@ -132,6 +139,10 @@ a slow learning rate, we prevent the agent from over-adjusting from each action.
 EVERY SINGLE FRAME FROM NOW ON"
 
 Bad idea.
+
+Currently, the learning rate is set to 0.01, this was found by setting it to a low value of 0.1 and dividing by 10 
+until a workable figure was found. Increasing the learning rate to 0.01, for example, results in complete failure and the
+agent unable to succeed even by episode 500.
 
 <h3>Optimality of neural net design</h3>
 
@@ -158,5 +169,11 @@ We used relu as the activation function for the hidden layers, and linear for th
 _A relu activation function is the same as linear, except that the minimum output of relu is always 0_.
 
 It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.
+
+<h4>Conclusion</h4>
+
+Hopefully, this example has given you an idea of the basics of reinforcement learning, the different components
+involved in the process and how it can be fine tuned for better results. In our next series, we will be doing
+reinforcement learning on a more complicated environment, Mario. Stay tuned!
 
 

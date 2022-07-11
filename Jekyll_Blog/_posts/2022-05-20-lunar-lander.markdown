@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  "Beating Lunar Lander with AI - Introduction"
+title:  "Introduction"
 date:   2022-05-20 14:16:40 -0400
-categories: ml
+author: "Daniel Mogilevsky, Gregory Ryslik"
+categories: Lander
 ---
 <h3>Introduction</h3>
 In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or 
@@ -42,20 +43,60 @@ For more information, visit the Lunar Lander environment link above.
 Now that we understand our constraints, let's get our solution setup and working.
 
 <h3>Setting up the project</h3>
-First, the following must be installed for our project to run:
+
+Before installing everything we need, you can do the optional step of installing [Anaconda](https://www.anaconda.com/)
+and [creating a conda environment](https://www.machinelearningplus.com/deployment/conda-create-environment-and-everything-you-need-to-know-to-manage-conda-virtual-environment/). 
+This is recommended, but completely unnecessary, so feel free to skip this step if you are fine with installing python
+packages outside of a virtual environment.
+
+Now, the following must be installed for our project to run:
 * [Python 3](https://www.python.org/downloads/)
 * [Numpy](https://numpy.org/install/)
 * [Tensorflow](https://www.tensorflow.org/install/)
 * [Gym](https://pypi.org/project/gym/)
 * [Pandas](https://pypi.org/project/pandas/)
+* [Git](https://git-scm.com/downloads) (Optional, makes it easy to clone the Git repository with all our code)
 
-Once you have the above, clone the Lunar Lander Git repo.
+Once you have the above, clone the [Lunar Lander Git repo](https://github.com/gryslik/ml-musings/tree/lunar_lander) by
+running the following in a terminal
+
+<p><code>git clone git@github.com:gryslik/ml-musings.git</code></p>
 
 <h3>Running the trainer</h3>
 To run the project, go into the project directory and from the terminal run:
 <p><code>python3 main.py</code></p> 
 
-When prompted, enter "1" to start training the agent. This will take a while.
+When prompted, enter "1" to start training the agent. This will take a while. Your output should
+look like the below and continue for a while
+
+```text
+======================================================
+Processing episode: 0
+======================================================
+1/1 [==============================] - 1s 857ms/step
+1/1 [==============================] - 0s 60ms/step
+1/1 [==============================] - 0s 40ms/step
+1/1 [==============================] - 0s 52ms/step
+1/1 [==============================] - 0s 23ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:58.907627: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+2022-06-29 18:58:58.950908: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 17ms/step
+1/1 [==============================] - 0s 11ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:59.378810: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 14ms/step
+1/1 [==============================] - 0s 12ms/step
+1/1 [==============================] - 0s 16ms/step
+--------------------------------------------------------
+Episode: 0 completed in: 78 steps.
+--------------------------------------------------------
+Failed to complete episode: 0 with a total reward of: -137.2459988101599
+Processing episode: 0 took: 3 seconds. Avg running reward is: -137.2459988101599
+======================================================
+Processing episode: 1
+======================================================
+```
 
 <h3>While the agent is training, check
 out the next blog post which talks about the project structure and what's happening as you're waiting.</h3>
