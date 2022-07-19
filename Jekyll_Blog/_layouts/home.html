@@ -16,11 +16,11 @@ layout: default
           <li>
             {%- if category.first == "Lander" -%}
             <h2>Beating Lunar Lander With AI</h2>
-            {%- else -%}
+            {%- endif -%}
+            {%- if category.first == "Mario" -%}
             <h2>Mario</h2>
             {%- endif -%}
-            {%- for post in site.posts -%}
-            {%- if cat
+            {%- for post in category.last -%}
             <ul>
               <li>
               <p>
@@ -30,7 +30,7 @@ layout: default
               </p>
               {%- if site.show_excerpts -%}
               {{ post.excerpt }}
-              {%- endif -%}
+                {%- endif -%}
               </li>
             </ul>
             {%- endfor -%}
