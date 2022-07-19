@@ -16,8 +16,11 @@ layout: default
           <li>
             {%- if category.first == "Lander" -%}
             <h2>Beating Lunar Lander With AI</h2>
+            {%- else -%}
+            <h2>Mario</h2>
             {%- endif -%}
             {%- for post in site.posts -%}
+            {%- if cat
             <ul>
               <li>
               <p>
