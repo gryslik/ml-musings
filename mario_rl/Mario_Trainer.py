@@ -197,7 +197,7 @@ def record_video(model_number):
 
     warnings.simplefilter("ignore", lineno=148)
 
-    env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')   #2-2, 1-1
+    env = gym_super_mario_bros.make('SuperMarioBros-1-3-v0')   #2-2, 1-1
     env = JoypadSpace(env, RIGHT_ONLY)
     env = gym.wrappers.RecordVideo(env, video_path+str(model_number))
 

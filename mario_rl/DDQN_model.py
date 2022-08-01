@@ -29,7 +29,6 @@ class DQN:
 
         self.gamma = 0.9
         self.epsilon = 1.0
-        # self.epsilon = 0.2 ## when restarting training...(should automate this)
         self.epsilon_min = 0.02
         self.epsilon_decay = 0.999995
         self.learning_rate = 0.00025
@@ -65,7 +64,6 @@ class DQN:
         model.add(tf.keras.layers.Flatten())
         model.add(tf.keras.layers.Dense(512, activation="relu"))
         model.add(tf.keras.layers.Dense(self.env.action_space.n))
-        # model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate))
         model.compile(loss=tf.keras.losses.Huber(), optimizer=tf.keras.optimizers.Adam(learning_rate=self.learning_rate)) ## huber loss takes advantage of l1/l2
         return model
 
