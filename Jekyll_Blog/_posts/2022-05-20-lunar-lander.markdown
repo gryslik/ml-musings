@@ -2,7 +2,7 @@
 layout: post
 title:  "Introduction"
 date:   2022-05-20 14:16:40 -0400
-author: "Daniel Mogilevsky, Gregory Ryslik"
+author: "Daniel Mogilevsky"
 categories: Lander
 ---
 <h3>Introduction</h3>

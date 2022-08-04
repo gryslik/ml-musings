@@ -2,7 +2,7 @@
 layout: post
 title:  "Part 1"
 date:   2022-06-05 14:16:40 -0400
-author: "Daniel Mogilevsky, Gregory Ryslik"
+author: "Daniel Mogilevsky"
 categories: Mario
 ---
 

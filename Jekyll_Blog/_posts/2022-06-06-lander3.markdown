@@ -2,7 +2,7 @@
 layout: post
 title:  "Part 3"
 date:   2022-06-05 14:16:40 -0400
-author: "Daniel Mogilevsky, Gregory Ryslik"
+author: "Daniel Mogilevsky"
 categories: Lander
 ---
 In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models

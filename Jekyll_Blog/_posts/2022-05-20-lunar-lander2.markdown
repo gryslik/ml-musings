@@ -2,7 +2,7 @@
 layout: post
 title:  "Part 2"
 date:   2022-05-21 14:16:40 -0400
-author: "Daniel Mogilevsky, Gregory Ryslik"
+author: "Daniel Mogilevsky"
 categories: Lander
 ---
 <h3>Introduction</h3>
