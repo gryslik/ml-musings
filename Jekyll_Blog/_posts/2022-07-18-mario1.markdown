@@ -16,6 +16,14 @@ machine. This blog post will assume you've read through the Lunar Lander post an
 and what the different hyper-parameters do. It will not include a detailed walkthrough of setting up the project
 locally, since the reader is unlikely to benefit from doing so.
 
+<h2> Environment </h2>
+
+The [Mario Environment](https://pypi.org/project/gym-super-mario-bros/) we are using has the following main objectives,
+moving as far to the right as possible and reaching the flag. The aim is to do this as fast as possible without dying.
+This is accomplished by tracking the x position of mario in the game and the in game clock. 
+The are also various mario stages available, as well as downsampling of stages. We will be training mario on the
+first stage without any downsampling.
+
 Unlike Lunar Lander, the Mario agent uses a special kind of neural net called a convolutional neural net.
 
 <h2>Convolutional Neural Network (CNN) </h2>
