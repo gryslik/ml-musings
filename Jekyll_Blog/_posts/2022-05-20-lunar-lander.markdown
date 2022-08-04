@@ -1,0 +1,107 @@
+---
+layout: post
+title:  "Lunar Lander - Introduction"
+date:   2022-05-20 14:16:40 -0400
+author: "Daniel Mogilevsky"
+categories: Lander
+---
+<h3>Introduction</h3>
+In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or 
+punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.
+
+In this series, we use reinforcement learning to make an intelligent lunar lander playing AI.
+
+The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
+down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.
+
+![Lunar Lander Game Guide](/images/lunar_lander.png)
+
+
+<h3>Environment</h3>
+To play this game with an AI, we will be using the [Gym Box2D lunar lander environment](https://www.gymlibrary.ml/environments/box2d/lunar_lander/). 
+This environment takes care of many things for us, such as creating the actual game, its rules, and providing a way
+for our AI to play the game. The environment specifies the following rewards and punishments:
+
+Rewards:
+* Moving from the top of the screen to the landing pad yields 100-140 points, which are lost if the lander moves away from the landing zone
+* Each leg that contacts the ground yields 10 points
+* If the lander comes to rest, it gets 100 points
+
+Punishments:
+* Firing the down thruster is -0.3 points per frame
+* Firing either of the side thrusters is -0.03 points per frame
+* Crashing the lander is -100 points
+
+Each iteration of the game is an "episode", and an episode ends when the lander comes to rest, crashes, leaves the screen, or achieves a certain score (200).
+If the agent ends the episode with a score of 200 or more, the game has been won.
+
+An episode is split into "frames", a frame being the smallest time slice in a game (FPS in a video game). Our agent
+makes calculations every frame. You'll see this referenced often.
+
+For more information, visit the Lunar Lander environment link above.
+
+Now that we understand our constraints, let's get our solution setup and working.
+
+<h3>Setting up the project</h3>
+
+Before installing everything we need, you can do the optional step of installing [Anaconda](https://www.anaconda.com/)
+and [creating a conda environment](https://www.machinelearningplus.com/deployment/conda-create-environment-and-everything-you-need-to-know-to-manage-conda-virtual-environment/). 
+This is recommended, but completely unnecessary, so feel free to skip this step if you are fine with installing python
+packages outside of a virtual environment.
+
+Now, the following must be installed for our project to run:
+* [Python 3](https://www.python.org/downloads/)
+* [Numpy](https://numpy.org/install/)
+* [Tensorflow](https://www.tensorflow.org/install/)
+* [Gym](https://pypi.org/project/gym/)
+* [Pandas](https://pypi.org/project/pandas/)
+* [Git](https://git-scm.com/downloads) (Optional, makes it easy to clone the Git repository with all our code)
+
+Once you have the above, clone the [Lunar Lander Git repo](https://github.com/gryslik/ml-musings/tree/lunar_lander) by
+running the following in a terminal
+
+<p><code>git clone git@github.com:gryslik/ml-musings.git</code></p>
+
+<h3>Running the trainer</h3>
+To run the project, go into the project directory and from the terminal run:
+<p><code>python3 main.py</code></p> 
+
+When prompted, enter "1" to start training the agent. This will take a while. Your output should
+look like the below and continue for a while
+
+```text
+======================================================
+Processing episode: 0
+======================================================
+1/1 [==============================] - 1s 857ms/step
+1/1 [==============================] - 0s 60ms/step
+1/1 [==============================] - 0s 40ms/step
+1/1 [==============================] - 0s 52ms/step
+1/1 [==============================] - 0s 23ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:58.907627: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+2022-06-29 18:58:58.950908: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 17ms/step
+1/1 [==============================] - 0s 11ms/step
+1/1 [==============================] - 0s 18ms/step
+2022-06-29 18:58:59.378810: W tensorflow/core/data/root_dataset.cc:247] Optimization loop failed: CANCELLED: Operation was cancelled
+1/1 [==============================] - 0s 14ms/step
+1/1 [==============================] - 0s 12ms/step
+1/1 [==============================] - 0s 16ms/step
+--------------------------------------------------------
+Episode: 0 completed in: 78 steps.
+--------------------------------------------------------
+Failed to complete episode: 0 with a total reward of: -137.2459988101599
+Processing episode: 0 took: 3 seconds. Avg running reward is: -137.2459988101599
+======================================================
+Processing episode: 1
+======================================================
+```
+
+<h3>While the agent is training, check
+out the next blog post which talks about the project structure and what's happening as you're waiting.</h3>
+
+
+
+
+

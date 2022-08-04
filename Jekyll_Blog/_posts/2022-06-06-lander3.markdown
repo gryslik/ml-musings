@@ -1,0 +1,179 @@
+---
+layout: post
+title:  "Lunar Lander - Part 3"
+date:   2022-06-05 14:16:40 -0400
+author: "Daniel Mogilevsky"
+categories: Lander
+---
+In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
+third and final post will answer the why behind our hyper parameter and architecture choices.
+
+<h3>Background knowledge</h3>
+<h4>Neural net</h4>
+In post 2, we showcased the neural net structure and left it at that. Now let's dive into how a neural net works.
+The below image gives a visual representation of what you already know.
+
+![Neural net Simple](/images/neuralnetsimple.png)
+
+Data that gets passed into an input layer,
+some hidden layers transform the input, and we get an output through the output layer. 
+But how does the data get passed through each node? The diagram below illustrates that process for each node.
+
+
+![Neural net detailed](/images/neuralnet1node.png)
+
+Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain _weight_.
+For each node, the previous nodes connecting to it are the _inputs_. Every input gets multiplied by a weight and has a _bias_
+added to it, and then they all get summed up. This is the _weighted sum_.
+The weighted sum is passed into an _activation function_ which returns an output. This output is the value 
+of a single node in the next layer. 
+
+There are a couple types of activation functions, some of the most common being linear, relu, and sigmoid. All they
+do is given a value x, pass it into a function that returns a new value. For example f(x) = k * x is a linear 
+activation function that returns x multiplied by some constant k. Relu and sigmoid are just more complex, nonlinear functions.
+
+So essentially:
+1. Input layer values are set by the data (observations)
+2. Each node in the next layer calculates its value by getting the weighted sum of all the nodes in the previous layer
+and passing the weighted sum through an activation function
+3. Repeat step 2 until we're out of the neural net
+
+This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
+spits out an action through the above process. But how does the agent optimize the neural net?
+
+<h4>Action -> Response -> Reward</h4>
+In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
+predicts the reward of this action.
+The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
+to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
+the weights and biases within its neural net through a process called backpropagation. _The structure of the neural net never
+changes, only the weights and biases change._
+This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
+what actions to take.
+
+![Reinforcement Learning Cycle](/images/rlcycle.png)
+
+You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
+Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
+start the agent, it has a high epsilon and thus chooses mostly random values, but tries to predict the reward each time.
+As it makes predictions and sees the results, it fine tunes its ability to make predictions. This is done by changing 
+the weights within the neural net. Eventually, it starts choosing what it believes to be the optimum action instead of
+a random one, how fast this happens depends on our initial epsilon and epsilon decay.
+
+This can be seen in the below act function, which is responsible for performing and returning an action
+
+```python
+    # Take an action given the current state
+    def act(self, state):
+        self.epsilon *= self.epsilon_decay # Multiply our epsilon by the decay
+        self.epsilon = max(self.epsilon_min, self.epsilon) # Never let epsilon go below the minium value
+        if np.random.random() < self.epsilon: # Generate a random number 0-1, if it's less than episolon, do a random action
+            return self.env.action_space.sample()
+        else: # Otherwise, pick what we believe to be the best action
+            return np.argmax(self.model.predict(state)[0])
+```
+
+An agent predicts the best action using something called the Bellman Equation
+
+<h4>Bellman Equation</h4>
+The [Bellman's Equation](https://www.geeksforgeeks.org/bellman-equation/)
+, as said in the linked article, states that the long-term reward of an action is equal to the reward of
+the action itself plus the expected reward from the following actions.
+
+To understand this better, let's use a concrete example from the Lunar Lander scenario. When the lander touches a leg
+to the ground, it earns a certain number of points, but when the lander crashes it loses significantly more points.
+If the lander tries to land too fast, it will first gain points for touching the ground, and then lose all those points
+and many more for crashing. The Bellman's equation will produce a low reward for attempting to land when
+moving too fast because the future reward is highly negative.
+
+The learning agent uses the Bellman Equation to predict the value of the current state. 
+
+![Bellman Equation](/images/bellman.png)
+
+Where:
+* V(s) is the value of state s
+* max a denotes the optimal action in the current state
+* R(s, a) is the reward for action a in state s
+* γ is gamma a.k.a the discount factor (one of our hyper parameters) and ranges from 0-1
+* s' is the next state resulting from taking action a in state s
+* V(s') is the value of the next state
+
+To summarize, the value of our current state is equal to the reward of taking the optimal action in the current state
+plus the discount factor times the value of the resulting state.
+
+<h3>Understanding optimality of our hyper parameters</h3>
+With the background knowledge, we can now infer why our chosen parameters are optimal
+
+<h4>Discount factor</h4>
+Discount factor, or gamma, was used in the Bellman Equation to give a weight to the value of future predicted rewards.
+This essentially controls how far into the future we look, with a larger discount factor giving us farther vision into the future.
+We've set our gamma very high, at 0.99. Why? Think about how many frames are in a single game of lunar lander. _A lot_.
+If we only take a couple frames into account when making predictions, there's no way we'll build an accurate model. Not a
+lot changes in between frames, so maximizing the discount factor ensures we look far enough into the future to make accurate
+predictions.
+
+Gamma was initially guessed at 0.9, which produced bad results, however 0.99 worked just fine
+
+<h4>Epsilon</h4>
+Just like gamma needed to be set very high because of the number of frames per game, so does epsilon need to be set high
+and epsilon decay needs to be slow. Each individual frame has little impact on the outcome. If epsilon
+decay happens quickly, the model will start taking "optimal actions" far before it knows what "optimal" is. This may
+cause the agent to get stuck in what's called a local minima. Essentially, the agent will continue to take similar actions
+again and again because it thinks other actions are sub-optimal, even if its current behavior is bad. An example of this
+would be cutting the engine completely and letting the lander crash because of the reward from touching the legs.
+
+We prevent this with a high epsilon and slow decay, causing the model to train on lots of random actions before picking
+optimal actions.
+
+Epsilon decay was guessed at around 0.9, but this wasn't high enough initially and produced very bad results.
+Then 0.99 was attempted, followed by 0.999. This was then decremented to 0.998, 0.997, etc and 0.996 was found to be
+the optimal value
+
+<h4>Learning rate</h4>
+Learning rate needs to be _sloooooow_, also because of the minimum impact of each frame. We want our agent to slowly adjust
+it's behavior from each frame for this reason. We have many, many frames, each very similar to the last. By setting
+a slow learning rate, we prevent the agent from over-adjusting from each action. 
+
+"Oh, firing the engine in this frame was better than not firing the engine? Okay, let me fire the main engine for 
+EVERY SINGLE FRAME FROM NOW ON"
+
+Bad idea.
+
+Currently, the learning rate is set to 0.01, this was found by setting it to a low value of 0.1 and dividing by 10 
+until a workable figure was found. Increasing the learning rate to 0.01, for example, results in complete failure and the
+agent unable to succeed even by episode 500.
+
+<h3>Optimality of neural net design</h3>
+
+With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
+The hidden layers, activation functions, and loss function were things we had to choose.
+
+To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
+the relu activation function. The output layer uses a linear activation function. The loss function we are using is
+means squared error (mse). 
+
+<h4>Node and layer counts</h4>
+Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It's very much
+an experimental process until the best one is discovered. Having too many layers can create a model that's overfitted
+to the training (meaning it won't generalize well to environments different than the ones it trained on),
+and too few causes the model to be too simple and fail to properly train for any environment.
+Two hidden layers worked well, so we stuck with that.
+
+For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
+we went from 150 to 120. Once again, there are no clear "rules" here. It's best to experiment and find what works best
+
+<h4>Activation functions</h4>
+We used relu as the activation function for the hidden layers, and linear for the output. 
+
+_A relu activation function is the same as linear, except that the minimum output of relu is always 0_.
+
+It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.
+
+<h4>Conclusion</h4>
+
+Hopefully, this example has given you an idea of the basics of reinforcement learning, the different components
+involved in the process and how it can be fine tuned for better results. In our next series, we will be doing
+reinforcement learning on a more complicated environment, Mario. Stay tuned!
+
+

@@ -1,0 +1,133 @@
+---
+layout: post
+title:  "Mario - Part 1"
+date:   2022-06-05 14:16:40 -0400
+author: "Daniel Mogilevsky"
+categories: Mario
+---
+
+<h2> Introduction </h2>
+Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.
+
+![Mario Game](/videos/mario_display.gif)
+
+Unlike the previous project, Lunar Lander, Mario will involve an amount of training time unfeasible for your personal
+machine. This blog post will assume you've read through the Lunar Lander post and are familiar with how a neural net works
+and what the different hyper-parameters do. It will not include a detailed walkthrough of setting up the project
+locally, since the reader is unlikely to benefit from doing so.
+
+<h2> Environment </h2>
+
+The [Mario Environment](https://pypi.org/project/gym-super-mario-bros/) we are using has the following main objectives,
+moving as far to the right as possible and reaching the flag. The aim is to do this as fast as possible without dying.
+This is accomplished by tracking the x position of mario in the game and the in game clock. 
+The are also various mario stages available, as well as downsampling of stages. We will be training mario on the
+first stage without any downsampling.
+
+Unlike Lunar Lander, the Mario agent uses a special kind of neural net called a convolutional neural net.
+
+<h2>Convolutional Neural Network (CNN) </h2>
+
+A CNN is a type of neural net used analyze visual imagery. In Lunar Lander, the environment gave us some explicit 
+information about the environment state, such as the location of the lander and its velocity. In Mario, we will be
+analyzing the actual game frames (images) similar to a human player to make decisions. This is done by passing each frame
+as image data into a CNN, and using the output as action. A detailed representation of this process is shown below:
+
+![CNN](/images/cnn.png)
+
+<h2>Mario Project Learning Agent</h2>
+
+Overall, the agent is very similar in structure to the Lunar Lander one, however. The main differences are the
+neural net structure and hyper-parameters. Below, the neural net is created which has 3 convolutional layers
+and takes as input the image of the mario game. After the convolutional layers, the data is flattened (meaning has its
+dimensions reduced) and is then passed into a regular neural net with a node count of 512 and an output layer representing
+the action space.
+
+```python
+    def create_model(self):
+        model = tf.keras.Sequential()
+        model.add(tf.keras.layers.Conv2D(32, 8, 4, input_shape=(self.single_frame_dim[0], self.single_frame_dim[1], self.num_frames_to_stack), activation="relu"))
+        model.add(tf.keras.layers.Conv2D(64, 4, 2, activation="relu"))
+        model.add(tf.keras.layers.Conv2D(64, 3, 1, activation="relu"))
+        model.add(tf.keras.layers.Flatten())
+        model.add(tf.keras.layers.Dense(512, activation="relu"))
+        model.add(tf.keras.layers.Dense(self.env.action_space.n))
+        model.compile(loss=tf.keras.losses.Huber(), optimizer=tf.keras.optimizers.Adam(learning_rate=self.learning_rate)) ## huber loss takes advantage of l1/l2
+        return model
+```
+
+The hyper-parameters are also different.
+
+```python
+class DQN:
+    def __init__(self, env, single_frame_dim,  num_frames_to_stack, old_model_filepath=None, old_epsilon_value = None):
+        self.env = env
+
+        #self.memory = collections.deque(maxlen=10000) #this is slow. Using my custom class.
+        self.burnin = 3000
+        self.memory = ReplayMemory(max_size=30000)
+
+        self.gamma = 0.9
+        self.epsilon = 1.0
+        self.epsilon_min = 0.02
+        self.epsilon_decay = 0.999995
+        self.learning_rate = 0.00025
+        self.update_target_step_count = 5000
+        self.num_steps_since_last_update = 0
+        self.single_frame_dim = single_frame_dim
+        self.num_frames_to_stack = num_frames_to_stack
+
+
+        if(old_model_filepath==None):
+            self.model = self.create_model()  # Will do the actual predictions
+            self.target_model = self.create_model()  # Will compute what action we DESIRE from our model
+        else:
+            self.model = tf.keras.models.load_model(old_model_filepath)
+            self.target_model = tf.keras.models.load_model(old_model_filepath)
+            self.epsilon = old_epsilon_value
+```
+
+The training logic can be found in Mario_Trainer.py. It's also very similar to the lunar lander code.
+
+<h2> Training the models </h2>
+
+Here's the training progress:
+
+Episode 0, where we only move right:
+
+![Mario 0](/videos/mario-0.gif)
+
+Episode 500, where we've learned nothing:
+
+![Mario 500](/videos/mario-500.gif)
+
+Episode 1500, now we can jump:
+
+![Mario 1500](/videos/mario-1500.gif)
+
+Episode 3000, we're better at jumping but we get stuck against walls:
+
+![Mario 3000](/videos/mario-3000.gif)
+
+Episode 5000, even better at jumping but we still get stuck:
+
+![Mario 5000](/videos/mario-5000.gif)
+
+Episode 7000 Victory!:
+
+![Mario 7000](/videos/mario-7000.gif)
+
+Although there were many successes along the way, the model continued to fail until becoming more consistent around
+the 7000 mark.
+
+But what happens if we try to use this model on a new mario level? What degree of success will we have then?
+
+The results are...atrocious
+
+![Mario 7000](/videos/mario-7000-2.gif)
+
+![Mario 7000](/videos/mario-7000-3.gif)
+
+Clearly, our model only works on the level it was trained on. We have overtrained our model to the specific mario level 
+we used, and this prevents our model from actually performing well at Mario. In future blog posts, we'll explore
+why this happened and how we can generate a model that can beat all levels of Mario. Stay tuned
