@@ -1,175 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/ml-musings/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/ml-musings/" rel="alternate" type="text/html" /><updated>2022-08-07T23:36:12-04:00</updated><id>http://localhost:4000/ml-musings/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Lunar Lander - Part 3</title><link href="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Lunar Lander - Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html">&lt;p&gt;In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
-for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
-third and final post will answer the why behind our hyper parameter and architecture choices.&lt;/p&gt;
-
-&lt;h3&gt;Background knowledge&lt;/h3&gt;
-&lt;h4&gt;Neural net&lt;/h4&gt;
-&lt;p&gt;In post 2, we showcased the neural net structure and left it at that. Now let’s dive into how a neural net works.
-The below image gives a visual representation of what you already know.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnetsimple.png&quot; alt=&quot;Neural net Simple&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Data that gets passed into an input layer,
-some hidden layers transform the input, and we get an output through the output layer. 
-But how does the data get passed through each node? The diagram below illustrates that process for each node.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnet1node.png&quot; alt=&quot;Neural net detailed&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain &lt;em&gt;weight&lt;/em&gt;.
-For each node, the previous nodes connecting to it are the &lt;em&gt;inputs&lt;/em&gt;. Every input gets multiplied by a weight and has a &lt;em&gt;bias&lt;/em&gt;
-added to it, and then they all get summed up. This is the &lt;em&gt;weighted sum&lt;/em&gt;.
-The weighted sum is passed into an &lt;em&gt;activation function&lt;/em&gt; which returns an output. This output is the value 
-of a single node in the next layer.&lt;/p&gt;
-
-&lt;p&gt;There are a couple types of activation functions, some of the most common being linear, relu, and sigmoid. All they
-do is given a value x, pass it into a function that returns a new value. For example f(x) = k * x is a linear 
-activation function that returns x multiplied by some constant k. Relu and sigmoid are just more complex, nonlinear functions.&lt;/p&gt;
-
-&lt;p&gt;So essentially:&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;Input layer values are set by the data (observations)&lt;/li&gt;
-  &lt;li&gt;Each node in the next layer calculates its value by getting the weighted sum of all the nodes in the previous layer
-and passing the weighted sum through an activation function&lt;/li&gt;
-  &lt;li&gt;Repeat step 2 until we’re out of the neural net&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
-spits out an action through the above process. But how does the agent optimize the neural net?&lt;/p&gt;
-
-&lt;h4&gt;Action -&amp;gt; Response -&amp;gt; Reward&lt;/h4&gt;
-&lt;p&gt;In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
-predicts the reward of this action.
-The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
-to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
-the weights and biases within its neural net through a process called backpropagation. &lt;em&gt;The structure of the neural net never
-changes, only the weights and biases change.&lt;/em&gt;
-This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
-what actions to take.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/rlcycle.png&quot; alt=&quot;Reinforcement Learning Cycle&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
-Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
-start the agent, it has a high epsilon and thus chooses mostly random values, but tries to predict the reward each time.
-As it makes predictions and sees the results, it fine tunes its ability to make predictions. This is done by changing 
-the weights within the neural net. Eventually, it starts choosing what it believes to be the optimum action instead of
-a random one, how fast this happens depends on our initial epsilon and epsilon decay.&lt;/p&gt;
-
-&lt;p&gt;This can be seen in the below act function, which is responsible for performing and returning an action&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;c1&quot;&gt;# Take an action given the current state
-&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;act&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_decay&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Multiply our epsilon by the decay
-&lt;/span&gt;        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Never let epsilon go below the minium value
-&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Generate a random number 0-1, if it's less than episolon, do a random action
-&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;action_space&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Otherwise, pick what we believe to be the best action
-&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;predict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;An agent predicts the best action using something called the Bellman Equation&lt;/p&gt;
-
-&lt;h4&gt;Bellman Equation&lt;/h4&gt;
-&lt;p&gt;The &lt;a href=&quot;https://www.geeksforgeeks.org/bellman-equation/&quot;&gt;Bellman’s Equation&lt;/a&gt;
-, as said in the linked article, states that the long-term reward of an action is equal to the reward of
-the action itself plus the expected reward from the following actions.&lt;/p&gt;
-
-&lt;p&gt;To understand this better, let’s use a concrete example from the Lunar Lander scenario. When the lander touches a leg
-to the ground, it earns a certain number of points, but when the lander crashes it loses significantly more points.
-If the lander tries to land too fast, it will first gain points for touching the ground, and then lose all those points
-and many more for crashing. The Bellman’s equation will produce a low reward for attempting to land when
-moving too fast because the future reward is highly negative.&lt;/p&gt;
-
-&lt;p&gt;The learning agent uses the Bellman Equation to predict the value of the current state.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/bellman.png&quot; alt=&quot;Bellman Equation&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Where:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;V(s) is the value of state s&lt;/li&gt;
-  &lt;li&gt;max a denotes the optimal action in the current state&lt;/li&gt;
-  &lt;li&gt;R(s, a) is the reward for action a in state s&lt;/li&gt;
-  &lt;li&gt;γ is gamma a.k.a the discount factor (one of our hyper parameters) and ranges from 0-1&lt;/li&gt;
-  &lt;li&gt;s’ is the next state resulting from taking action a in state s&lt;/li&gt;
-  &lt;li&gt;V(s’) is the value of the next state&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To summarize, the value of our current state is equal to the reward of taking the optimal action in the current state
-plus the discount factor times the value of the resulting state.&lt;/p&gt;
-
-&lt;h3&gt;Understanding optimality of our hyper parameters&lt;/h3&gt;
-&lt;p&gt;With the background knowledge, we can now infer why our chosen parameters are optimal&lt;/p&gt;
-
-&lt;h4&gt;Discount factor&lt;/h4&gt;
-&lt;p&gt;Discount factor, or gamma, was used in the Bellman Equation to give a weight to the value of future predicted rewards.
-This essentially controls how far into the future we look, with a larger discount factor giving us farther vision into the future.
-We’ve set our gamma very high, at 0.99. Why? Think about how many frames are in a single game of lunar lander. &lt;em&gt;A lot&lt;/em&gt;.
-If we only take a couple frames into account when making predictions, there’s no way we’ll build an accurate model. Not a
-lot changes in between frames, so maximizing the discount factor ensures we look far enough into the future to make accurate
-predictions.&lt;/p&gt;
-
-&lt;p&gt;Gamma was initially guessed at 0.9, which produced bad results, however 0.99 worked just fine&lt;/p&gt;
-
-&lt;h4&gt;Epsilon&lt;/h4&gt;
-&lt;p&gt;Just like gamma needed to be set very high because of the number of frames per game, so does epsilon need to be set high
-and epsilon decay needs to be slow. Each individual frame has little impact on the outcome. If epsilon
-decay happens quickly, the model will start taking “optimal actions” far before it knows what “optimal” is. This may
-cause the agent to get stuck in what’s called a local minima. Essentially, the agent will continue to take similar actions
-again and again because it thinks other actions are sub-optimal, even if its current behavior is bad. An example of this
-would be cutting the engine completely and letting the lander crash because of the reward from touching the legs.&lt;/p&gt;
-
-&lt;p&gt;We prevent this with a high epsilon and slow decay, causing the model to train on lots of random actions before picking
-optimal actions.&lt;/p&gt;
-
-&lt;p&gt;Epsilon decay was guessed at around 0.9, but this wasn’t high enough initially and produced very bad results.
-Then 0.99 was attempted, followed by 0.999. This was then decremented to 0.998, 0.997, etc and 0.996 was found to be
-the optimal value&lt;/p&gt;
-
-&lt;h4&gt;Learning rate&lt;/h4&gt;
-&lt;p&gt;Learning rate needs to be &lt;em&gt;sloooooow&lt;/em&gt;, also because of the minimum impact of each frame. We want our agent to slowly adjust
-it’s behavior from each frame for this reason. We have many, many frames, each very similar to the last. By setting
-a slow learning rate, we prevent the agent from over-adjusting from each action.&lt;/p&gt;
-
-&lt;p&gt;“Oh, firing the engine in this frame was better than not firing the engine? Okay, let me fire the main engine for 
-EVERY SINGLE FRAME FROM NOW ON”&lt;/p&gt;
-
-&lt;p&gt;Bad idea.&lt;/p&gt;
-
-&lt;p&gt;Currently, the learning rate is set to 0.01, this was found by setting it to a low value of 0.1 and dividing by 10 
-until a workable figure was found. Increasing the learning rate to 0.01, for example, results in complete failure and the
-agent unable to succeed even by episode 500.&lt;/p&gt;
-
-&lt;h3&gt;Optimality of neural net design&lt;/h3&gt;
-
-&lt;p&gt;With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
-The hidden layers, activation functions, and loss function were things we had to choose.&lt;/p&gt;
-
-&lt;p&gt;To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
-the relu activation function. The output layer uses a linear activation function. The loss function we are using is
-means squared error (mse).&lt;/p&gt;
-
-&lt;h4&gt;Node and layer counts&lt;/h4&gt;
-&lt;p&gt;Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It’s very much
-an experimental process until the best one is discovered. Having too many layers can create a model that’s overfitted
-to the training (meaning it won’t generalize well to environments different than the ones it trained on),
-and too few causes the model to be too simple and fail to properly train for any environment.
-Two hidden layers worked well, so we stuck with that.&lt;/p&gt;
-
-&lt;p&gt;For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
-we went from 150 to 120. Once again, there are no clear “rules” here. It’s best to experiment and find what works best&lt;/p&gt;
-
-&lt;h4&gt;Activation functions&lt;/h4&gt;
-&lt;p&gt;We used relu as the activation function for the hidden layers, and linear for the output.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;A relu activation function is the same as linear, except that the minimum output of relu is always 0&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.&lt;/p&gt;
-
-&lt;h4&gt;Conclusion&lt;/h4&gt;
-
-&lt;p&gt;Hopefully, this example has given you an idea of the basics of reinforcement learning, the different components
-involved in the process and how it can be fine tuned for better results. In our next series, we will be doing
-reinforcement learning on a more complicated environment, Mario. Stay tuned!&lt;/p&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Lander" /><summary type="html">In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.</summary></entry><entry><title type="html">Mario - Part 1</title><link href="http://localhost:4000/ml-musings/mario/2022/06/05/mario1.html" rel="alternate" type="text/html" title="Mario - Part 1" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/mario/2022/06/05/mario1</id><content type="html" xml:base="http://localhost:4000/ml-musings/mario/2022/06/05/mario1.html">&lt;h2&gt; Introduction &lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/ml-musings/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/ml-musings/" rel="alternate" type="text/html" /><updated>2022-08-08T13:54:44-04:00</updated><id>http://localhost:4000/ml-musings/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Mario - Part 1</title><link href="http://localhost:4000/ml-musings/mario/2022/07/25/mario1.html" rel="alternate" type="text/html" title="Mario - Part 1" /><published>2022-07-25T14:16:40-04:00</published><updated>2022-07-25T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/mario/2022/07/25/mario1</id><content type="html" xml:base="http://localhost:4000/ml-musings/mario/2022/07/25/mario1.html">&lt;h2&gt; Introduction &lt;/h2&gt;
 &lt;p&gt;Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario_display.gif&quot; alt=&quot;Mario Game&quot; /&gt;&lt;/p&gt;
@@ -291,7 +120,178 @@ the 7000 mark.&lt;/p&gt;
 
 &lt;p&gt;Clearly, our model only works on the level it was trained on. We have overtrained our model to the specific mario level 
 we used, and this prevents our model from actually performing well at Mario. In future blog posts, we’ll explore
-why this happened and how we can generate a model that can beat all levels of Mario. Stay tuned&lt;/p&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Mario" /><summary type="html">Introduction Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.</summary></entry><entry><title type="html">Lunar Lander - Part 2</title><link href="http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2.html" rel="alternate" type="text/html" title="Lunar Lander - Part 2" /><published>2022-05-21T14:16:40-04:00</published><updated>2022-05-21T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2.html">&lt;h3&gt;Introduction&lt;/h3&gt;
+why this happened and how we can generate a model that can beat all levels of Mario. Stay tuned&lt;/p&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Mario" /><summary type="html">Introduction Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.</summary></entry><entry><title type="html">Lunar Lander - Part 3</title><link href="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Lunar Lander - Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html">&lt;p&gt;In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
+third and final post will answer the why behind our hyper parameter and architecture choices.&lt;/p&gt;
+
+&lt;h3&gt;Background knowledge&lt;/h3&gt;
+&lt;h4&gt;Neural net&lt;/h4&gt;
+&lt;p&gt;In post 2, we showcased the neural net structure and left it at that. Now let’s dive into how a neural net works.
+The below image gives a visual representation of what you already know.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnetsimple.png&quot; alt=&quot;Neural net Simple&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Data that gets passed into an input layer,
+some hidden layers transform the input, and we get an output through the output layer. 
+But how does the data get passed through each node? The diagram below illustrates that process for each node.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnet1node.png&quot; alt=&quot;Neural net detailed&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain &lt;em&gt;weight&lt;/em&gt;.
+For each node, the previous nodes connecting to it are the &lt;em&gt;inputs&lt;/em&gt;. Every input gets multiplied by a weight and has a &lt;em&gt;bias&lt;/em&gt;
+added to it, and then they all get summed up. This is the &lt;em&gt;weighted sum&lt;/em&gt;.
+The weighted sum is passed into an &lt;em&gt;activation function&lt;/em&gt; which returns an output. This output is the value 
+of a single node in the next layer.&lt;/p&gt;
+
+&lt;p&gt;There are a couple types of activation functions, some of the most common being linear, relu, and sigmoid. All they
+do is given a value x, pass it into a function that returns a new value. For example f(x) = k * x is a linear 
+activation function that returns x multiplied by some constant k. Relu and sigmoid are just more complex, nonlinear functions.&lt;/p&gt;
+
+&lt;p&gt;So essentially:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Input layer values are set by the data (observations)&lt;/li&gt;
+  &lt;li&gt;Each node in the next layer calculates its value by getting the weighted sum of all the nodes in the previous layer
+and passing the weighted sum through an activation function&lt;/li&gt;
+  &lt;li&gt;Repeat step 2 until we’re out of the neural net&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
+spits out an action through the above process. But how does the agent optimize the neural net?&lt;/p&gt;
+
+&lt;h4&gt;Action -&amp;gt; Response -&amp;gt; Reward&lt;/h4&gt;
+&lt;p&gt;In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
+predicts the reward of this action.
+The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
+to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
+the weights and biases within its neural net through a process called backpropagation. &lt;em&gt;The structure of the neural net never
+changes, only the weights and biases change.&lt;/em&gt;
+This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
+what actions to take.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/rlcycle.png&quot; alt=&quot;Reinforcement Learning Cycle&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
+Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
+start the agent, it has a high epsilon and thus chooses mostly random values, but tries to predict the reward each time.
+As it makes predictions and sees the results, it fine tunes its ability to make predictions. This is done by changing 
+the weights within the neural net. Eventually, it starts choosing what it believes to be the optimum action instead of
+a random one, how fast this happens depends on our initial epsilon and epsilon decay.&lt;/p&gt;
+
+&lt;p&gt;This can be seen in the below act function, which is responsible for performing and returning an action&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;c1&quot;&gt;# Take an action given the current state
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;act&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_decay&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Multiply our epsilon by the decay
+&lt;/span&gt;        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Never let epsilon go below the minium value
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Generate a random number 0-1, if it&apos;s less than episolon, do a random action
+&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;action_space&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Otherwise, pick what we believe to be the best action
+&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;predict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;An agent predicts the best action using something called the Bellman Equation&lt;/p&gt;
+
+&lt;h4&gt;Bellman Equation&lt;/h4&gt;
+&lt;p&gt;The &lt;a href=&quot;https://www.geeksforgeeks.org/bellman-equation/&quot;&gt;Bellman’s Equation&lt;/a&gt;
+, as said in the linked article, states that the long-term reward of an action is equal to the reward of
+the action itself plus the expected reward from the following actions.&lt;/p&gt;
+
+&lt;p&gt;To understand this better, let’s use a concrete example from the Lunar Lander scenario. When the lander touches a leg
+to the ground, it earns a certain number of points, but when the lander crashes it loses significantly more points.
+If the lander tries to land too fast, it will first gain points for touching the ground, and then lose all those points
+and many more for crashing. The Bellman’s equation will produce a low reward for attempting to land when
+moving too fast because the future reward is highly negative.&lt;/p&gt;
+
+&lt;p&gt;The learning agent uses the Bellman Equation to predict the value of the current state.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/bellman.png&quot; alt=&quot;Bellman Equation&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Where:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;V(s) is the value of state s&lt;/li&gt;
+  &lt;li&gt;max a denotes the optimal action in the current state&lt;/li&gt;
+  &lt;li&gt;R(s, a) is the reward for action a in state s&lt;/li&gt;
+  &lt;li&gt;γ is gamma a.k.a the discount factor (one of our hyper parameters) and ranges from 0-1&lt;/li&gt;
+  &lt;li&gt;s’ is the next state resulting from taking action a in state s&lt;/li&gt;
+  &lt;li&gt;V(s’) is the value of the next state&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To summarize, the value of our current state is equal to the reward of taking the optimal action in the current state
+plus the discount factor times the value of the resulting state.&lt;/p&gt;
+
+&lt;h3&gt;Understanding optimality of our hyper parameters&lt;/h3&gt;
+&lt;p&gt;With the background knowledge, we can now infer why our chosen parameters are optimal&lt;/p&gt;
+
+&lt;h4&gt;Discount factor&lt;/h4&gt;
+&lt;p&gt;Discount factor, or gamma, was used in the Bellman Equation to give a weight to the value of future predicted rewards.
+This essentially controls how far into the future we look, with a larger discount factor giving us farther vision into the future.
+We’ve set our gamma very high, at 0.99. Why? Think about how many frames are in a single game of lunar lander. &lt;em&gt;A lot&lt;/em&gt;.
+If we only take a couple frames into account when making predictions, there’s no way we’ll build an accurate model. Not a
+lot changes in between frames, so maximizing the discount factor ensures we look far enough into the future to make accurate
+predictions.&lt;/p&gt;
+
+&lt;p&gt;Gamma was initially guessed at 0.9, which produced bad results, however 0.99 worked just fine&lt;/p&gt;
+
+&lt;h4&gt;Epsilon&lt;/h4&gt;
+&lt;p&gt;Just like gamma needed to be set very high because of the number of frames per game, so does epsilon need to be set high
+and epsilon decay needs to be slow. Each individual frame has little impact on the outcome. If epsilon
+decay happens quickly, the model will start taking “optimal actions” far before it knows what “optimal” is. This may
+cause the agent to get stuck in what’s called a local minima. Essentially, the agent will continue to take similar actions
+again and again because it thinks other actions are sub-optimal, even if its current behavior is bad. An example of this
+would be cutting the engine completely and letting the lander crash because of the reward from touching the legs.&lt;/p&gt;
+
+&lt;p&gt;We prevent this with a high epsilon and slow decay, causing the model to train on lots of random actions before picking
+optimal actions.&lt;/p&gt;
+
+&lt;p&gt;Epsilon decay was guessed at around 0.9, but this wasn’t high enough initially and produced very bad results.
+Then 0.99 was attempted, followed by 0.999. This was then decremented to 0.998, 0.997, etc and 0.996 was found to be
+the optimal value&lt;/p&gt;
+
+&lt;h4&gt;Learning rate&lt;/h4&gt;
+&lt;p&gt;Learning rate needs to be &lt;em&gt;sloooooow&lt;/em&gt;, also because of the minimum impact of each frame. We want our agent to slowly adjust
+it’s behavior from each frame for this reason. We have many, many frames, each very similar to the last. By setting
+a slow learning rate, we prevent the agent from over-adjusting from each action.&lt;/p&gt;
+
+&lt;p&gt;“Oh, firing the engine in this frame was better than not firing the engine? Okay, let me fire the main engine for 
+EVERY SINGLE FRAME FROM NOW ON”&lt;/p&gt;
+
+&lt;p&gt;Bad idea.&lt;/p&gt;
+
+&lt;p&gt;Currently, the learning rate is set to 0.01, this was found by setting it to a low value of 0.1 and dividing by 10 
+until a workable figure was found. Increasing the learning rate to 0.01, for example, results in complete failure and the
+agent unable to succeed even by episode 500.&lt;/p&gt;
+
+&lt;h3&gt;Optimality of neural net design&lt;/h3&gt;
+
+&lt;p&gt;With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
+The hidden layers, activation functions, and loss function were things we had to choose.&lt;/p&gt;
+
+&lt;p&gt;To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
+the relu activation function. The output layer uses a linear activation function. The loss function we are using is
+means squared error (mse).&lt;/p&gt;
+
+&lt;h4&gt;Node and layer counts&lt;/h4&gt;
+&lt;p&gt;Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It’s very much
+an experimental process until the best one is discovered. Having too many layers can create a model that’s overfitted
+to the training (meaning it won’t generalize well to environments different than the ones it trained on),
+and too few causes the model to be too simple and fail to properly train for any environment.
+Two hidden layers worked well, so we stuck with that.&lt;/p&gt;
+
+&lt;p&gt;For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
+we went from 150 to 120. Once again, there are no clear “rules” here. It’s best to experiment and find what works best&lt;/p&gt;
+
+&lt;h4&gt;Activation functions&lt;/h4&gt;
+&lt;p&gt;We used relu as the activation function for the hidden layers, and linear for the output.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;A relu activation function is the same as linear, except that the minimum output of relu is always 0&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.&lt;/p&gt;
+
+&lt;h4&gt;Conclusion&lt;/h4&gt;
+
+&lt;p&gt;Hopefully, this example has given you an idea of the basics of reinforcement learning, the different components
+involved in the process and how it can be fine tuned for better results. In our next series, we will be doing
+reinforcement learning on a more complicated environment, Mario. Stay tuned!&lt;/p&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Lander" /><summary type="html">In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.</summary></entry><entry><title type="html">Lunar Lander - Part 2</title><link href="http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2.html" rel="alternate" type="text/html" title="Lunar Lander - Part 2" /><published>2022-05-21T14:16:40-04:00</published><updated>2022-05-21T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/05/21/lunar-lander2.html">&lt;h3&gt;Introduction&lt;/h3&gt;
 &lt;p&gt;In the previous post, we provided an overview of the lunar lander environment and got our solution
 installed and running. In this post, we’ll talk about the structure of the solution and what’s happening as we train
 our agent.&lt;/p&gt;
@@ -379,7 +379,7 @@ agent picks a random action or what it believes to be the ideal action.
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;act&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
         &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_decay&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Multiply our epsilon by the decay
 &lt;/span&gt;        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon_min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Never let epsilon go below the minium value
-&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Generate a random number 0-1, if it's less than episolon, do a random action
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Generate a random number 0-1, if it&apos;s less than episolon, do a random action
 &lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;action_space&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
         &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# Otherwise, pick what we believe to be the best action
 &lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;predict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
@@ -405,7 +405,7 @@ the agent, and creating variables to track total reward and # of steps per episo
 
 &lt;p&gt;&lt;a href=&quot;https://github.com/gryslik/ml-musings/blob/109d54e39476636e714b686a1c63ef71da54d1ae/lunar_lander/eagle_large.py#L155-L196&quot;&gt;Link to Code&lt;/a&gt;&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;train_agent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gym&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'LunarLander-v2'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gym&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;LunarLander-v2&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;num_episodes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;my_agent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DQN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;totalreward&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
@@ -575,4 +575,4 @@ Processing episode: 1
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3&gt;While the agent is training, check
-out the next blog post which talks about the project structure and what's happening as you're waiting.&lt;/h3&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Lander" /><summary type="html">Introduction In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.</summary></entry></feed>
+out the next blog post which talks about the project structure and what&apos;s happening as you&apos;re waiting.&lt;/h3&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Lander" /><summary type="html">Introduction In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or punished for its actions, and over time optimizes itself to better perform as it learns what actions yield the highest reward.</summary></entry></feed>
