@@ -21,7 +21,10 @@ baseurl: "/ml-musings" # the subpath of your site, e.g. /blog
 url: "https://gryslik.github.io/ " # the base hostname & protocol for your site, e.g. http://example.com
 #twitter_username: jekyllrb
 github_username:  gryslik
-github: [metadata]
+#github: [metadata]
+github:
+  is_project_page: true
+  #[metadata]
 
 # Build settings
 markdown: kramdown
