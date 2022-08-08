@@ -38,7 +38,7 @@ layout: default
                 -
                   {%- for author in authors -%}
                     {%- if author.name == post.author -%}
-                    <a href={{author.url}}> {{author.name}} </a>
+                    <a href={{author.url}} style="text-decoration:underline;color:black"> {{author.name}} </a>
                   {%- endif -%}
                   {%- endfor -%}
 
