@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/ml-musings/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/ml-musings/" rel="alternate" type="text/html" /><updated>2022-08-07T22:44:26-04:00</updated><id>http://localhost:4000/ml-musings/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Lunar Lander - Part 3</title><link href="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Lunar Lander - Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html">&lt;p&gt;In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/ml-musings/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/ml-musings/" rel="alternate" type="text/html" /><updated>2022-08-07T22:53:52-04:00</updated><id>http://localhost:4000/ml-musings/feed.xml</id><title type="html">ML Musings</title><subtitle>An exploration of machine learning</subtitle><entry><title type="html">Lunar Lander - Part 3</title><link href="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" rel="alternate" type="text/html" title="Lunar Lander - Part 3" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/lander/2022/06/05/lander3</id><content type="html" xml:base="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html">&lt;p&gt;In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
 for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
 third and final post will answer the why behind our hyper parameter and architecture choices.&lt;/p&gt;
 
@@ -7,13 +7,13 @@ third and final post will answer the why behind our hyper parameter and architec
 &lt;p&gt;In post 2, we showcased the neural net structure and left it at that. Now let’s dive into how a neural net works.
 The below image gives a visual representation of what you already know.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/neuralnetsimple.png&quot; alt=&quot;Neural net Simple&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnetsimple.png&quot; alt=&quot;Neural net Simple&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Data that gets passed into an input layer,
 some hidden layers transform the input, and we get an output through the output layer. 
 But how does the data get passed through each node? The diagram below illustrates that process for each node.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/neuralnet1node.png&quot; alt=&quot;Neural net detailed&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/neuralnet1node.png&quot; alt=&quot;Neural net detailed&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain &lt;em&gt;weight&lt;/em&gt;.
 For each node, the previous nodes connecting to it are the &lt;em&gt;inputs&lt;/em&gt;. Every input gets multiplied by a weight and has a &lt;em&gt;bias&lt;/em&gt;
@@ -46,7 +46,7 @@ changes, only the weights and biases change.&lt;/em&gt;
 This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
 what actions to take.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/rlcycle.png&quot; alt=&quot;Reinforcement Learning Cycle&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/rlcycle.png&quot; alt=&quot;Reinforcement Learning Cycle&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
 Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
@@ -82,7 +82,7 @@ moving too fast because the future reward is highly negative.&lt;/p&gt;
 
 &lt;p&gt;The learning agent uses the Bellman Equation to predict the value of the current state.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/bellman.png&quot; alt=&quot;Bellman Equation&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/bellman.png&quot; alt=&quot;Bellman Equation&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Where:&lt;/p&gt;
 &lt;ul&gt;
@@ -172,7 +172,7 @@ involved in the process and how it can be fine tuned for better results. In our 
 reinforcement learning on a more complicated environment, Mario. Stay tuned!&lt;/p&gt;</content><author><name>Daniel Mogilevsky</name></author><category term="Lander" /><summary type="html">In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.</summary></entry><entry><title type="html">Mario - Part 1</title><link href="http://localhost:4000/ml-musings/mario/2022/06/05/mario1.html" rel="alternate" type="text/html" title="Mario - Part 1" /><published>2022-06-05T14:16:40-04:00</published><updated>2022-06-05T14:16:40-04:00</updated><id>http://localhost:4000/ml-musings/mario/2022/06/05/mario1</id><content type="html" xml:base="http://localhost:4000/ml-musings/mario/2022/06/05/mario1.html">&lt;h2&gt; Introduction &lt;/h2&gt;
 &lt;p&gt;Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario_display.gif&quot; alt=&quot;Mario Game&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario_display.gif&quot; alt=&quot;Mario Game&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Unlike the previous project, Lunar Lander, Mario will involve an amount of training time unfeasible for your personal
 machine. This blog post will assume you’ve read through the Lunar Lander post and are familiar with how a neural net works
@@ -196,7 +196,7 @@ information about the environment state, such as the location of the lander and 
 analyzing the actual game frames (images) similar to a human player to make decisions. This is done by passing each frame
 as image data into a CNN, and using the output as action. A detailed representation of this process is shown below:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/cnn.png&quot; alt=&quot;CNN&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/cnn.png&quot; alt=&quot;CNN&quot; /&gt;&lt;/p&gt;
 
 &lt;h2&gt;Mario Project Learning Agent&lt;/h2&gt;
 
@@ -256,27 +256,27 @@ the action space.&lt;/p&gt;
 
 &lt;p&gt;Episode 0, where we only move right:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-0.gif&quot; alt=&quot;Mario 0&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-0.gif&quot; alt=&quot;Mario 0&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Episode 500, where we’ve learned nothing:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-500.gif&quot; alt=&quot;Mario 500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-500.gif&quot; alt=&quot;Mario 500&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Episode 1500, now we can jump:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-1500.gif&quot; alt=&quot;Mario 1500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-1500.gif&quot; alt=&quot;Mario 1500&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Episode 3000, we’re better at jumping but we get stuck against walls:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-3000.gif&quot; alt=&quot;Mario 3000&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-3000.gif&quot; alt=&quot;Mario 3000&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Episode 5000, even better at jumping but we still get stuck:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-5000.gif&quot; alt=&quot;Mario 5000&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-5000.gif&quot; alt=&quot;Mario 5000&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Episode 7000 Victory!:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-7000.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-7000.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Although there were many successes along the way, the model continued to fail until becoming more consistent around
 the 7000 mark.&lt;/p&gt;
@@ -285,9 +285,9 @@ the 7000 mark.&lt;/p&gt;
 
 &lt;p&gt;The results are…atrocious&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-7000-2.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-7000-2.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/videos/mario-7000-3.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/videos/mario-7000-3.gif&quot; alt=&quot;Mario 7000&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Clearly, our model only works on the level it was trained on. We have overtrained our model to the specific mario level 
 we used, and this prevents our model from actually performing well at Mario. In future blog posts, we’ll explore
@@ -462,16 +462,16 @@ We also check if we are done with this episode.
 &lt;p&gt;Here’s how the models progressed as we trained them:&lt;/p&gt;
 
 &lt;p&gt;First attempt (model 0) goes terribly
-&lt;img src=&quot;/videos/lander_crash.gif&quot; alt=&quot;crash&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/ml-musings/assets/videos/lander_crash.gif&quot; alt=&quot;crash&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;By model 40, the lander learns how to hover above the goal area without crashing:
-&lt;img src=&quot;/videos/lander_hover.gif&quot; alt=&quot;hover&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/ml-musings/assets/videos/lander_hover.gif&quot; alt=&quot;hover&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;At model 110, the lander is landing, but not quite in the goal post
-&lt;img src=&quot;/videos/almost.gif&quot; alt=&quot;almost&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/ml-musings/assets/videos/almost.gif&quot; alt=&quot;almost&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;By model/episode 140, the lander is landing in the goal area perfectly:
-&lt;img src=&quot;/videos/perfect.gif&quot; alt=&quot;perfect&quot; /&gt;&lt;/p&gt;
+&lt;img src=&quot;/ml-musings/assets/videos/perfect.gif&quot; alt=&quot;perfect&quot; /&gt;&lt;/p&gt;
 
 &lt;h3&gt;Conclusion&lt;/h3&gt;
 
@@ -486,7 +486,7 @@ punished for its actions, and over time optimizes itself to better perform as it
 &lt;p&gt;The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
 down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/lunar_lander.png&quot; alt=&quot;Lunar Lander Game Guide&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ml-musings/assets/images/lunar_lander.png&quot; alt=&quot;Lunar Lander Game Guide&quot; /&gt;&lt;/p&gt;
 
 &lt;h3&gt;Environment&lt;/h3&gt;
 &lt;p&gt;To play this game with an AI, we will be using the &lt;a href=&quot;https://www.gymlibrary.ml/environments/box2d/lunar_lander/&quot;&gt;Gym Box2D lunar lander environment&lt;/a&gt;. 

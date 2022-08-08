@@ -9,7 +9,7 @@ categories: Mario
 <h2> Introduction </h2>
 Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.
 
-![Mario Game](/videos/mario_display.gif)
+![Mario Game](/ml-musings/assets/videos/mario_display.gif)
 
 Unlike the previous project, Lunar Lander, Mario will involve an amount of training time unfeasible for your personal
 machine. This blog post will assume you've read through the Lunar Lander post and are familiar with how a neural net works
@@ -33,7 +33,7 @@ information about the environment state, such as the location of the lander and 
 analyzing the actual game frames (images) similar to a human player to make decisions. This is done by passing each frame
 as image data into a CNN, and using the output as action. A detailed representation of this process is shown below:
 
-![CNN](/images/cnn.png)
+![CNN](/ml-musings/assets/images/cnn.png)
 
 <h2>Mario Project Learning Agent</h2>
 
@@ -95,27 +95,27 @@ Here's the training progress:
 
 Episode 0, where we only move right:
 
-![Mario 0](/videos/mario-0.gif)
+![Mario 0](/ml-musings/assets/videos/mario-0.gif)
 
 Episode 500, where we've learned nothing:
 
-![Mario 500](/videos/mario-500.gif)
+![Mario 500](/ml-musings/assets/videos/mario-500.gif)
 
 Episode 1500, now we can jump:
 
-![Mario 1500](/videos/mario-1500.gif)
+![Mario 1500](/ml-musings/assets/videos/mario-1500.gif)
 
 Episode 3000, we're better at jumping but we get stuck against walls:
 
-![Mario 3000](/videos/mario-3000.gif)
+![Mario 3000](/ml-musings/assets/videos/mario-3000.gif)
 
 Episode 5000, even better at jumping but we still get stuck:
 
-![Mario 5000](/videos/mario-5000.gif)
+![Mario 5000](/ml-musings/assets/videos/mario-5000.gif)
 
 Episode 7000 Victory!:
 
-![Mario 7000](/videos/mario-7000.gif)
+![Mario 7000](/ml-musings/assets/videos/mario-7000.gif)
 
 Although there were many successes along the way, the model continued to fail until becoming more consistent around
 the 7000 mark.
@@ -124,9 +124,9 @@ But what happens if we try to use this model on a new mario level? What degree o
 
 The results are...atrocious
 
-![Mario 7000](/videos/mario-7000-2.gif)
+![Mario 7000](/ml-musings/assets/videos/mario-7000-2.gif)
 
-![Mario 7000](/videos/mario-7000-3.gif)
+![Mario 7000](/ml-musings/assets/videos/mario-7000-3.gif)
 
 Clearly, our model only works on the level it was trained on. We have overtrained our model to the specific mario level 
 we used, and this prevents our model from actually performing well at Mario. In future blog posts, we'll explore

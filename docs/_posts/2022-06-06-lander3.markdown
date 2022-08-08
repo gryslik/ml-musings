@@ -14,14 +14,14 @@ third and final post will answer the why behind our hyper parameter and architec
 In post 2, we showcased the neural net structure and left it at that. Now let's dive into how a neural net works.
 The below image gives a visual representation of what you already know.
 
-![Neural net Simple](/images/neuralnetsimple.png)
+![Neural net Simple](/ml-musings/assets/images/neuralnetsimple.png)
 
 Data that gets passed into an input layer,
 some hidden layers transform the input, and we get an output through the output layer. 
 But how does the data get passed through each node? The diagram below illustrates that process for each node.
 
 
-![Neural net detailed](/images/neuralnet1node.png)
+![Neural net detailed](/ml-musings/assets/images/neuralnet1node.png)
 
 Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain _weight_.
 For each node, the previous nodes connecting to it are the _inputs_. Every input gets multiplied by a weight and has a _bias_
@@ -52,7 +52,7 @@ changes, only the weights and biases change._
 This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
 what actions to take.
 
-![Reinforcement Learning Cycle](/images/rlcycle.png)
+![Reinforcement Learning Cycle](/ml-musings/assets/images/rlcycle.png)
 
 You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
 Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
@@ -89,7 +89,7 @@ moving too fast because the future reward is highly negative.
 
 The learning agent uses the Bellman Equation to predict the value of the current state. 
 
-![Bellman Equation](/images/bellman.png)
+![Bellman Equation](/ml-musings/assets/images/bellman.png)
 
 Where:
 * V(s) is the value of state s

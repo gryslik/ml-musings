@@ -175,17 +175,17 @@ These values are what you see printed to the console when you train the agent.
 Here's how the models progressed as we trained them:
 
 First attempt (model 0) goes terribly
-![crash](/videos/lander_crash.gif)
+![crash](/ml-musings/assets/videos/lander_crash.gif)
 
 
 By model 40, the lander learns how to hover above the goal area without crashing:
-![hover](/videos/lander_hover.gif)
+![hover](/ml-musings/assets/videos/lander_hover.gif)
 
 At model 110, the lander is landing, but not quite in the goal post
-![almost](/videos/almost.gif)
+![almost](/ml-musings/assets/videos/almost.gif)
 
 By model/episode 140, the lander is landing in the goal area perfectly:
-![perfect](/videos/perfect.gif)
+![perfect](/ml-musings/assets/videos/perfect.gif)
 
 <h3>Conclusion</h3>
 

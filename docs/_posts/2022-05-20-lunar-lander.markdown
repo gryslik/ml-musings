@@ -14,7 +14,7 @@ In this series, we use reinforcement learning to make an intelligent lunar lande
 The rules of Lunar Lander are simple. The user controls a lander by firing a combination of three thrusters:
 down, left, and right. The player must fire these thrusters in a way to safely land within the area marked by the flags.
 
-![Lunar Lander Game Guide](/images/lunar_lander.png)
+![Lunar Lander Game Guide](/ml-musings/assets/images/lunar_lander.png)
 
 
 <h3>Environment</h3>
