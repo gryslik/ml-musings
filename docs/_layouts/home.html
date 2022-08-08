@@ -1,0 +1,42 @@
+---
+layout: default
+---
+
+<div class="home">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
+
+  {{ content }}
+
+  {%- if site.posts.size > 0 -%}
+    <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
+    <ul class="post-list">
+        {%- for category in site.categories -%}
+          <li>
+            {%- if category.first == "Lander" -%}
+            <h2>Beating Lunar Lander With AI</h2>
+            {%- endif -%}
+            {%- if category.first == "Mario" -%}
+            <h2>Mario</h2>
+            {%- endif -%}
+            {%- for post in category.last -%}
+            <ul>
+              <li>
+              <p>
+                <a class="post-link" href="{{ post.url | relative_url }}">
+                  {{ post.title | escape }}
+                </a>
+              </p>
+              {%- if site.show_excerpts -%}
+              {{ post.excerpt }}
+                {%- endif -%}
+              </li>
+            </ul>
+            {%- endfor -%}
+          </li>
+        {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+</div>

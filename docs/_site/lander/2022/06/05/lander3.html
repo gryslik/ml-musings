@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Lunar Lander - Part 3 | ML Musings</title>
+<meta name="generator" content="Jekyll v3.9.2" />
+<meta property="og:title" content="Lunar Lander - Part 3" />
+<meta name="author" content="Daniel Mogilevsky" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices." />
+<meta property="og:description" content="In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices." />
+<link rel="canonical" href="http://localhost:4000/lander/2022/06/05/lander3.html" />
+<meta property="og:url" content="http://localhost:4000/lander/2022/06/05/lander3.html" />
+<meta property="og:site_name" content="ML Musings" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-06-05T14:16:40-04:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lunar Lander - Part 3" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Daniel Mogilevsky"},"dateModified":"2022-06-05T14:16:40-04:00","datePublished":"2022-06-05T14:16:40-04:00","description":"In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.","headline":"Lunar Lander - Part 3","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/lander/2022/06/05/lander3.html"},"url":"http://localhost:4000/lander/2022/06/05/lander3.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="ML Musings" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">ML Musings</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Lunar Lander - Part 3</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-06-05T14:16:40-04:00" itemprop="datePublished">Jun 5, 2022
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">Daniel Mogilevsky</span></span></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
+third and final post will answer the why behind our hyper parameter and architecture choices.</p>
+
+<h3>Background knowledge</h3>
+<h4>Neural net</h4>
+<p>In post 2, we showcased the neural net structure and left it at that. Now let’s dive into how a neural net works.
+The below image gives a visual representation of what you already know.</p>
+
+<p><img src="/images/neuralnetsimple.png" alt="Neural net Simple" /></p>
+
+<p>Data that gets passed into an input layer,
+some hidden layers transform the input, and we get an output through the output layer. 
+But how does the data get passed through each node? The diagram below illustrates that process for each node.</p>
+
+<p><img src="/images/neuralnet1node.png" alt="Neural net detailed" /></p>
+
+<p>Each layer of the net is connected to the previous layer, and each node-to-node connection has a certain <em>weight</em>.
+For each node, the previous nodes connecting to it are the <em>inputs</em>. Every input gets multiplied by a weight and has a <em>bias</em>
+added to it, and then they all get summed up. This is the <em>weighted sum</em>.
+The weighted sum is passed into an <em>activation function</em> which returns an output. This output is the value 
+of a single node in the next layer.</p>
+
+<p>There are a couple types of activation functions, some of the most common being linear, relu, and sigmoid. All they
+do is given a value x, pass it into a function that returns a new value. For example f(x) = k * x is a linear 
+activation function that returns x multiplied by some constant k. Relu and sigmoid are just more complex, nonlinear functions.</p>
+
+<p>So essentially:</p>
+<ol>
+  <li>Input layer values are set by the data (observations)</li>
+  <li>Each node in the next layer calculates its value by getting the weighted sum of all the nodes in the previous layer
+and passing the weighted sum through an activation function</li>
+  <li>Repeat step 2 until we’re out of the neural net</li>
+</ol>
+
+<p>This happens every single frame of lunar lander. An observation about the environment gets passed in, and the neural net
+spits out an action through the above process. But how does the agent optimize the neural net?</p>
+
+<h4>Action -&gt; Response -&gt; Reward</h4>
+<p>In reinforcement learning, this is the basic learning cycle. As displayed below, an agent takes an action and
+predicts the reward of this action.
+The action produces a response from the environment, with both a new state and actual reward. The agent compares its predicted reward 
+to the actual reward. The agent optimizes itself based on the deviation, and takes a new action. This is done by changing
+the weights and biases within its neural net through a process called backpropagation. <em>The structure of the neural net never
+changes, only the weights and biases change.</em>
+This pattern continues until the agent is able to accurately predict the rewards of actions, and then the agent knows
+what actions to take.</p>
+
+<p><img src="/images/rlcycle.png" alt="Reinforcement Learning Cycle" /></p>
+
+<p>You may remember a hyper parameter we defined in the last post, epsilon, alongside minimum epsilon and epsilon decay.
+Epsilon ranges from 0-1 and is the probability that we choose a random action over what we think will be best. When we
+start the agent, it has a high epsilon and thus chooses mostly random values, but tries to predict the reward each time.
+As it makes predictions and sees the results, it fine tunes its ability to make predictions. This is done by changing 
+the weights within the neural net. Eventually, it starts choosing what it believes to be the optimum action instead of
+a random one, how fast this happens depends on our initial epsilon and epsilon decay.</p>
+
+<p>This can be seen in the below act function, which is responsible for performing and returning an action</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># Take an action given the current state
+</span>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">epsilon</span> <span class="o">*=</span> <span class="bp">self</span><span class="p">.</span><span class="n">epsilon_decay</span> <span class="c1"># Multiply our epsilon by the decay
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">epsilon_min</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">epsilon</span><span class="p">)</span> <span class="c1"># Never let epsilon go below the minium value
+</span>        <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">epsilon</span><span class="p">:</span> <span class="c1"># Generate a random number 0-1, if it's less than episolon, do a random action
+</span>            <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">action_space</span><span class="p">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># Otherwise, pick what we believe to be the best action
+</span>            <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">state</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>An agent predicts the best action using something called the Bellman Equation</p>
+
+<h4>Bellman Equation</h4>
+<p>The <a href="https://www.geeksforgeeks.org/bellman-equation/">Bellman’s Equation</a>
+, as said in the linked article, states that the long-term reward of an action is equal to the reward of
+the action itself plus the expected reward from the following actions.</p>
+
+<p>To understand this better, let’s use a concrete example from the Lunar Lander scenario. When the lander touches a leg
+to the ground, it earns a certain number of points, but when the lander crashes it loses significantly more points.
+If the lander tries to land too fast, it will first gain points for touching the ground, and then lose all those points
+and many more for crashing. The Bellman’s equation will produce a low reward for attempting to land when
+moving too fast because the future reward is highly negative.</p>
+
+<p>The learning agent uses the Bellman Equation to predict the value of the current state.</p>
+
+<p><img src="/images/bellman.png" alt="Bellman Equation" /></p>
+
+<p>Where:</p>
+<ul>
+  <li>V(s) is the value of state s</li>
+  <li>max a denotes the optimal action in the current state</li>
+  <li>R(s, a) is the reward for action a in state s</li>
+  <li>γ is gamma a.k.a the discount factor (one of our hyper parameters) and ranges from 0-1</li>
+  <li>s’ is the next state resulting from taking action a in state s</li>
+  <li>V(s’) is the value of the next state</li>
+</ul>
+
+<p>To summarize, the value of our current state is equal to the reward of taking the optimal action in the current state
+plus the discount factor times the value of the resulting state.</p>
+
+<h3>Understanding optimality of our hyper parameters</h3>
+<p>With the background knowledge, we can now infer why our chosen parameters are optimal</p>
+
+<h4>Discount factor</h4>
+<p>Discount factor, or gamma, was used in the Bellman Equation to give a weight to the value of future predicted rewards.
+This essentially controls how far into the future we look, with a larger discount factor giving us farther vision into the future.
+We’ve set our gamma very high, at 0.99. Why? Think about how many frames are in a single game of lunar lander. <em>A lot</em>.
+If we only take a couple frames into account when making predictions, there’s no way we’ll build an accurate model. Not a
+lot changes in between frames, so maximizing the discount factor ensures we look far enough into the future to make accurate
+predictions.</p>
+
+<p>Gamma was initially guessed at 0.9, which produced bad results, however 0.99 worked just fine</p>
+
+<h4>Epsilon</h4>
+<p>Just like gamma needed to be set very high because of the number of frames per game, so does epsilon need to be set high
+and epsilon decay needs to be slow. Each individual frame has little impact on the outcome. If epsilon
+decay happens quickly, the model will start taking “optimal actions” far before it knows what “optimal” is. This may
+cause the agent to get stuck in what’s called a local minima. Essentially, the agent will continue to take similar actions
+again and again because it thinks other actions are sub-optimal, even if its current behavior is bad. An example of this
+would be cutting the engine completely and letting the lander crash because of the reward from touching the legs.</p>
+
+<p>We prevent this with a high epsilon and slow decay, causing the model to train on lots of random actions before picking
+optimal actions.</p>
+
+<p>Epsilon decay was guessed at around 0.9, but this wasn’t high enough initially and produced very bad results.
+Then 0.99 was attempted, followed by 0.999. This was then decremented to 0.998, 0.997, etc and 0.996 was found to be
+the optimal value</p>
+
+<h4>Learning rate</h4>
+<p>Learning rate needs to be <em>sloooooow</em>, also because of the minimum impact of each frame. We want our agent to slowly adjust
+it’s behavior from each frame for this reason. We have many, many frames, each very similar to the last. By setting
+a slow learning rate, we prevent the agent from over-adjusting from each action.</p>
+
+<p>“Oh, firing the engine in this frame was better than not firing the engine? Okay, let me fire the main engine for 
+EVERY SINGLE FRAME FROM NOW ON”</p>
+
+<p>Bad idea.</p>
+
+<p>Currently, the learning rate is set to 0.01, this was found by setting it to a low value of 0.1 and dividing by 10 
+until a workable figure was found. Increasing the learning rate to 0.01, for example, results in complete failure and the
+agent unable to succeed even by episode 500.</p>
+
+<h3>Optimality of neural net design</h3>
+
+<p>With our neural net, 2 things were predetermined based on the environment, that being input and output dimension.
+The hidden layers, activation functions, and loss function were things we had to choose.</p>
+
+<p>To review, we have two hidden layers, the first one having 150 and the second one having 120 nodes. Both use
+the relu activation function. The output layer uses a linear activation function. The loss function we are using is
+means squared error (mse).</p>
+
+<h4>Node and layer counts</h4>
+<p>Quite frankly, it is very difficult to say for sure that a particular node/layer count is optimal. It’s very much
+an experimental process until the best one is discovered. Having too many layers can create a model that’s overfitted
+to the training (meaning it won’t generalize well to environments different than the ones it trained on),
+and too few causes the model to be too simple and fail to properly train for any environment.
+Two hidden layers worked well, so we stuck with that.</p>
+
+<p>For node count, a commonly used strategy is to gradually decrease the node count in the hidden layers. This is why
+we went from 150 to 120. Once again, there are no clear “rules” here. It’s best to experiment and find what works best</p>
+
+<h4>Activation functions</h4>
+<p>We used relu as the activation function for the hidden layers, and linear for the output.</p>
+
+<p><em>A relu activation function is the same as linear, except that the minimum output of relu is always 0</em>.</p>
+
+<p>It is one of the most commonly used activation functions and often the default, so we felt no need to deviate.</p>
+
+<h4>Conclusion</h4>
+
+<p>Hopefully, this example has given you an idea of the basics of reinforcement learning, the different components
+involved in the process and how it can be fine tuned for better results. In our next series, we will be doing
+reinforcement learning on a more complicated environment, Mario. Stay tuned!</p>
+
+
+  </div><a class="u-url" href="/lander/2022/06/05/lander3.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">ML Musings</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">ML Musings</li><li><a class="u-email" href="mailto:gryslik@gmail.com">gryslik@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/gryslik"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">gryslik</span></a></li><li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jekyllrb</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>An exploration of machine learning</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
