@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title:  "Lunar Lander - Part 2"
 date:   2022-05-21 14:16:40 -0400
 author: "Daniel Mogilevsky"
