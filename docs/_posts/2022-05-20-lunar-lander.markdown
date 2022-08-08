@@ -1,9 +1,10 @@
 ---
 layout: default
-title:  "Lunar Lander - Introduction"
-date:   2022-05-20 14:16:40 -0400
+title:  "Lunar Lander, Introduction"
+date:   2022-05-20
 author: "Daniel Mogilevsky"
 categories: Lander
+type: post
 ---
 <h3>Introduction</h3>
 In reinforcement learning, an agent (an entity that makes decisions) gets rewarded or 

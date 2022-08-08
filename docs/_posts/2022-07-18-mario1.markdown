@@ -1,12 +1,13 @@
 ---
 layout: default
-title:  "Mario - Part 1"
+title:  "Mario, Part 1"
 date:   2022-06-05 14:16:40 -0400
 author: "Daniel Mogilevsky"
 categories: Mario
+type: post
 ---
 
-<h2> Introduction </h2>
+<h3> Introduction </h3>
 Having completed the Lunar Lander series, we are now moving on to a more challenging game, Mario.
 
 ![Mario Game](/ml-musings/assets/videos/mario_display.gif)

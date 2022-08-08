@@ -4,7 +4,7 @@
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="/ml-musings/assets/css/style.css?v=a203ecc34795c781c47f2fcb32b9029c1236461c" media="screen" type="text/css">
+    <link rel="stylesheet" href="/ml-musings/assets/css/style.css?v=c175cae2af53f3be3ad7c3746f3f091992e602bf" media="screen" type="text/css">
     <link rel="stylesheet" href="/ml-musings/assets/css/print.css" media="print" type="text/css">
 
     <!--[if lt IE 9]>
@@ -12,22 +12,22 @@
     <![endif]-->
 
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Lunar Lander - Part 3 | ML Musings</title>
+<title>Lunar Lander, Part 3 | ML Musings</title>
 <meta name="generator" content="Jekyll v3.9.2" />
-<meta property="og:title" content="Lunar Lander - Part 3" />
+<meta property="og:title" content="Lunar Lander, Part 3" />
 <meta name="author" content="Daniel Mogilevsky" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices." />
-<meta property="og:description" content="In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices." />
+<meta name="description" content="Introduction" />
+<meta property="og:description" content="Introduction" />
 <link rel="canonical" href="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" />
 <meta property="og:url" content="http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html" />
 <meta property="og:site_name" content="ML Musings" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2022-06-05T14:16:40-04:00" />
+<meta property="article:published_time" content="2022-06-05T00:00:00-04:00" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Lunar Lander - Part 3" />
+<meta property="twitter:title" content="Lunar Lander, Part 3" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Daniel Mogilevsky"},"dateModified":"2022-06-05T14:16:40-04:00","datePublished":"2022-06-05T14:16:40-04:00","description":"In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This third and final post will answer the why behind our hyper parameter and architecture choices.","headline":"Lunar Lander - Part 3","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html"},"url":"http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Daniel Mogilevsky"},"dateModified":"2022-06-05T00:00:00-04:00","datePublished":"2022-06-05T00:00:00-04:00","description":"Introduction","headline":"Lunar Lander, Part 3","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html"},"url":"http://localhost:4000/ml-musings/lander/2022/06/05/lander3.html"}</script>
 <!-- End Jekyll SEO tag -->
 
 
@@ -47,7 +47,7 @@
   <body>
     <header>
       <div class="inner">
-        <a href="">
+        <a href="/ml-musings/">
           <h1>ML Musings</h1>
         </a>
         <h2>An exploration of machine learning</h2>
@@ -60,8 +60,15 @@
 
     <div id="content-wrapper">
       <div class="inner clearfix">
-        <section id="main-content">
-          <p>In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
+        <section id="main-content"><hr>
+            <h2>Lunar Lander, Part 3 </h2>
+      	    <hr>
+            <h3>Author: Daniel Mogilevsky <br> 
+	            Date: June 5, 2022 <br>
+			   Categories: Lander </h3>
+		    <hr><h3>Introduction</h3>
+
+<p>In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
 for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
 third and final post will answer the why behind our hyper parameter and architecture choices.</p>
 

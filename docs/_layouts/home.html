@@ -25,14 +25,14 @@ layout: default
             <h2>Beating Lunar Lander With AI</h2>
             {%- endif -%}
             {%- if category.first == "Mario" -%}
-            <h2>Mario</h2>
+            <h2>Using ML to play Mario the hard way</h2>
             {%- endif -%}
             {%- for post in category.last -%}
             <ul>
               <li>
               <p>
                 <a class="post-link" href="{{ post.url | relative_url }}">
-                  {{ post.title | escape }}
+                 {{post.date | date: "%B %-d, %Y"}} - {{ post.title | escape }} 
                 </a>
               </p>
               {%- if site.show_excerpts -%}
@@ -40,7 +40,7 @@ layout: default
                 {%- endif -%}
               </li>
             </ul>
-            {%- endfor -%}
+            {%- endfor -%}	 
           </li>
         {%- endfor -%}
     </ul>

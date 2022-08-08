@@ -1,10 +1,15 @@
 ---
 layout: default
-title:  "Lunar Lander - Part 3"
-date:   2022-06-05 14:16:40 -0400
+title:  "Lunar Lander, Part 3"
+date:   2022-06-05
 author: "Daniel Mogilevsky"
 categories: Lander
+type: post
 ---
+
+
+<h3>Introduction</h3>
+
 In part two of the lunar lander series, we showcased the basics of how our AI agent trains and creates models
 for flying the lander successfully, however, lots of questions were left unanswered about our design choices. This
 third and final post will answer the why behind our hyper parameter and architecture choices.
