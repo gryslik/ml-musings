@@ -20,7 +20,7 @@ layout: default
     <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
     <ul class="post-list">
         {%- for category in site.categories -%}
-          <li>
+          
             {%- if category.first == "Lander" -%}
             <h2>Beating Lunar Lander With AI</h2>
             {%- endif -%}
@@ -32,7 +32,8 @@ layout: default
               <li>
               <p>
                 <a class="post-link" href="{{ post.url | relative_url }}">
-                 {{post.date | date: "%B %-d, %Y"}} - {{ post.title | escape }} 
+                 {{post.date | date: "%B %-d, %Y"}} - 
+                 {{ post.title }} 
                 </a>
               </p>
               {%- if site.show_excerpts -%}
@@ -41,7 +42,7 @@ layout: default
               </li>
             </ul>
             {%- endfor -%}	 
-          </li>
+          
         {%- endfor -%}
     </ul>
   {%- endif -%}
