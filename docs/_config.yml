@@ -17,8 +17,8 @@ title: ML Musings
 email: gryslik@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   An exploration of machine learning
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://gryslik.github.io/ml-musings/" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/ml-musings" # the subpath of your site, e.g. /blog
+url: "https://gryslik.github.io/ml-musings/ " # the base hostname & protocol for your site, e.g. http://example.com
 #twitter_username: jekyllrb
 github_username:  gryslik
 github: [metadata]
