@@ -7,8 +7,6 @@ layout: default
     <h1 class="page-heading">{{ page.title }}</h1>
   {%- endif -%}
 
-  {{ content }}
-
   {%- if site.posts.size > 0 -%}
     <h2> About </h2>
     This site is hosted Professor Greg Ryslik. It was first developed during the summer of 2022 as an exercise in reinforcement learning. However, it's purpose soon became as a place for students to experiment with machine learning algorithms and then write up what they have learned and explore the field. <br> <br> 
@@ -16,9 +14,11 @@ layout: default
     This blog is meant to be an exploration of the field. The goal is to explore, get code working, figure out why and then write it up. It's not meant to be all encompassing or exhaustive, but my hope is as more students get involved, the knowledge base will grow. <br> <br>
     
     Please don't hesitate to contribute either through PR's to the repository or by sending an email to ryslik DOT 1 AT osu DOT edu.
-    
+
+
     <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
     <ul class="post-list">
+        {% assign authors = site.data.authors %}
         {%- for category in site.categories -%}
           
             {%- if category.first == "Lander" -%}
@@ -35,6 +35,13 @@ layout: default
                  {{post.date | date: "%B %-d, %Y"}} - 
                  {{ post.title }} 
                 </a>
+                -
+                  {%- for author in authors -%}
+                    {%- if author.name == post.author -%}
+                    <a href={{author.url}} style="text-decoration:underline;color:black"> {{author.name}} </a>
+                  {%- endif -%}
+                  {%- endfor -%}
+
               </p>
               {%- if site.show_excerpts -%}
               {{ post.excerpt }}
